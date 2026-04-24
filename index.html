@@ -1,0 +1,4251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ma Ligue Discord</title>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<style>
+
+body {
+  margin:0;
+  font-family:Arial;
+  background:#020617;
+  color:white;
+}
+
+/* BARRE DÉFILANTE */
+.announcement-bar{
+  width:100%;
+  background:#111;
+  color:white;
+  overflow:hidden;
+  white-space:nowrap;
+  padding:12px 0;
+  border-bottom:2px solid #38bdf8;
+  font-weight:bold;
+  font-size:15px;
+}
+
+.announcement-text{
+  display:inline-block;
+  padding-left:100%;
+  animation:scrollText 18s linear infinite;
+}
+
+@keyframes scrollText{
+  0%{transform:translateX(0);}
+  100%{transform:translateX(-100%);}
+}
+
+header{
+  text-align:center;
+  padding:20px;
+  font-size:30px;
+  background:#020617;
+}
+
+nav{
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  margin:20px;
+}
+
+nav button{
+  padding:10px 20px;
+  border:none;
+  background:#334155;
+  color:white;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.section{
+  display:none;
+  padding:20px;
+}
+
+.active{
+  display:block;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;
+}
+
+/* CLUB CARD */
+.club{
+  background:#1e293b;
+  border-radius:15px;
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.club:hover{
+  transform:scale(1.05);
+}
+
+.club img{
+  width:60px;
+  height:auto;
+  transition:transform 0.3s ease;
+}
+
+.club:hover img{
+  transform:scale(1.3);
+}
+
+/* DETAILS */
+.details{
+  display:none;
+  margin-top:10px;
+  flex-wrap:wrap;
+  gap:5px;
+  justify-content:center;
+}
+
+.result{
+  padding:5px 10px;
+  margin:3px;
+  border-radius:5px;
+  display:inline-block;
+}
+
+.V{background:green}
+.N{background:yellow;color:black}
+.D{background:red}
+
+.rank-img{
+  width:100%;
+  max-width:900px;
+  border-radius:15px;
+  margin-top:20px;
+}
+
+/* MATCHS */
+.match{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:15px;
+  background:#1e293b;
+  padding:10px;
+  border-radius:12px;
+  margin:8px 0;
+}
+
+.match img{
+  width:40px;
+  height:40px;
+  object-fit:contain;
+}
+
+.match .vs{
+  font-weight:bold;
+  color:#38bdf8;
+}
+
+/* BUDGET */
+.budget-card{
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  text-align:center;
+}
+
+.budget-value{
+  font-size:18px;
+  margin-top:10px;
+  color:#38bdf8;
+}
+
+/* ADMIN */
+#adminPanel{
+  display:none;
+  background:#0f172a;
+  padding:20px;
+  border-top:2px solid #38bdf8;
+}
+
+input,button{
+  padding:10px;
+  margin:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- BARRE DÉFILANTE -->
+<div class="announcement-bar">
+  <div class="announcement-text">
+    🔥 Bienvenue sur la Ligue Manager • LA SAISON COMMENCE BIENTOT • Bonne chance à tous les présidents 🔥
+  </div>
+</div>
+
+</script>
+
+<header>⚽ LIGUE DISCORD ⚽</header>
+
+<nav>
+<button onclick="showSection('ligue1')">Ligue 1</button>
+<button onclick="showSection('ligue2')">Ligue 2</button>
+</nav>
+
+<!-- 🔵 LOGO LIGUE 1 EN FOND -->
+<div class="logo-bg">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/ligue-1--white.4072671a.png">
+</div>
+
+<!-- 🟠 LOGO LIGUE 2 QUI REBONDIT -->
+<img class="logo2" src="https://assets.football-logos.cc/logos/france/512x512/ligue-2--white.c112a648.png">
+
+<style>
+
+/* NE CASSE PAS LE SITE */
+body{
+  margin:0;
+}
+
+/* ===== LIGUE 1 (fond animé) ===== */
+.logo-bg{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-10;
+  pointer-events:none;
+}
+
+.logo-bg img{
+  position:absolute;
+  width:350px;
+  opacity:0.07;
+  animation: moveLogo 12s linear infinite;
+}
+
+@keyframes moveLogo{
+  0%{top:10%; left:10%;}
+  25%{top:70%; left:20%;}
+  50%{top:40%; left:80%;}
+  75%{top:80%; left:60%;}
+  100%{top:10%; left:10%;}
+}
+
+/* ===== LIGUE 2 (rebond) ===== */
+.logo2{
+  position:fixed;
+  width:180px;
+  opacity:0.2;
+  z-index:-5;
+}
+</style>
+
+<script>
+const logo2 = document.querySelector(".logo2");
+
+let x = 100;
+let y = 100;
+let dx = 3;
+let dy = 2;
+
+function animate(){
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  x += dx;
+  y += dy;
+
+  if(x <= 0 || x >= w - 180) dx *= -1;
+  if(y <= 0 || y >= h - 180) dy *= -1;
+
+  logo2.style.left = x + "px";
+  logo2.style.top = y + "px";
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+<!-- LIGUE 1 -->
+<div id="ligue1" class="section active">
+<h2>Ligue 1</h2>
+<div class="grid" id="ligue1Container"></div>
+
+<h2>Classement</h2>
+<img class="rank-img" src="https://cdn.discordapp.com/attachments/1405993419364372580/1494801612928188606/image.png?ex=69ed287c&is=69ebd6fc&hm=1f40f180c72f2e7f63f0d532789aafe32ef3831ee5331e97b030cddd3cae8dcb&">
+
+<h2>Journées (LIVE)</h2>
+<!-- Calendrier Ligue 1 -->
+<div class="journee">
+  <h3>1ère journée</h3>
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png" alt="Lens">
+    <span>Lens</span>
+    <span class="vs">vs</span>
+    <span>Brest</span>
+    <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png" alt="Brest">
+  </div>
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png" alt="Monaco">
+    <span>AS Monaco</span>
+    <span class="vs">vs</span>
+    <span>Rennes</span>
+    <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png" alt="Rennes">
+  </div>
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png" alt="Le Havre">
+    <span>Le Havre</span>
+    <span class="vs">vs</span>
+    <span>Paris FC</span>
+    <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png" alt="Paris FC">
+  </div>
+
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png" alt="Reims">
+    <span>Reims</span>
+    <span class="vs">vs</span>
+    <span>Montpellier HSC</span>
+    <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png" alt="Montpellier">
+  </div>
+
+  <div class="match">
+    <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&" alt="OM">
+    <span>OM</span>
+    <span class="vs">vs</span>
+    <span>AS Saint-Étienne</span>
+    <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&" alt="Saint-Étienne">
+  </div>
+
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png" alt="Metz">
+    <span>FC Metz</span>
+    <span class="vs">vs</span>
+    <span>Lille</span>
+    <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png" alt="Lille">
+  </div>
+
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png" alt="Lyon">
+    <span>Lyon</span>
+    <span class="vs">vs</span>
+    <span>Strasbourg</span>
+    <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png" alt="Strasbourg">
+  </div>
+
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png" alt="Angers">
+    <span>Angers</span>
+    <span class="vs">vs</span>
+    <span>Paris SG</span>
+    <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png" alt="PSG">
+  </div>
+
+  <div class="match">
+    <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png" alt="Toulouse">
+    <span>Toulouse FC</span>
+    <span class="vs">vs</span>
+    <span>OGC Nice</span>
+    <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png" alt="Nice">
+  </div>
+  <!-- ===================== JOURNÉE 2 ===================== -->
+<h3>2ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<h3>3ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+<h3>4ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+<h3>5ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>6ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+<h3>7ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png">
+  <span>OM</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+<h3>8ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+<h3>9ème journée</h3>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>10ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+<h3>11ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+<h3>12ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+<h3>13ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>14ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+<h3>15ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+<h3>16ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+<h3>17ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+<h3>18ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>19ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+<h3>20ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+<h3>21ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>22ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>23ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+<h3>24ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>25ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>26ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+<h3>27ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+<h3>28ème journée</h3>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>29ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>30ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+<h3>31ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+  <span>Montpellier HSC</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+  <span>AS Saint-Étienne</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>AS Monaco</span>
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>Le Havre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+  <span>OGC Nice</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+<h3>32ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+  <span>Lyon</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+  <span>FC Metz</span><span class="vs">vs</span><span>Toulouse FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Paris SG</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>Strasbourg</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>33ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+  <span>Rennes</span><span class="vs">vs</span><span>Brest</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+  <span>Paris FC</span><span class="vs">vs</span><span>Lens</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+  <span>Lille</span><span class="vs">vs</span><span>Reims</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>OM</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+  <span>Angers</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+<h3>34ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png">
+  <span>Toulouse FC</span><span class="vs">vs</span><span>Angers</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png">
+  <span>Paris SG</span><span class="vs">vs</span><span>Lyon</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png">
+  <span>Strasbourg</span><span class="vs">vs</span><span>FC Metz</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png">
+</div>
+
+<div class="match">
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&">
+  <span>OM</span><span class="vs">vs</span><span>Lille</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png">
+  <span>Reims</span><span class="vs">vs</span><span>AS Saint-Étienne</span>
+  <img src="https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png">
+  <span>Le Havre</span><span class="vs">vs</span><span>Montpellier HSC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png">
+  <span>AS Monaco</span><span class="vs">vs</span><span>Paris FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png">
+  <span>Lens</span><span class="vs">vs</span><span>Rennes</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png">
+  <span>Brest</span><span class="vs">vs</span><span>OGC Nice</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png">
+</div>
+
+
+</div>
+
+</div>
+
+
+
+</div>
+
+<!-- LIGUE 2 -->
+<div id="ligue2" class="section">
+<h2>Ligue 2</h2>
+<div class="grid" id="ligue2Container"></div>
+
+<h2>Classement</h2>
+<img class="rank-img" src="TON_IMAGE_CLASSEMENT_LIGUE2.png">
+
+<h2>Journées (LIVE)</h2>
+<h3>1ère journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>2ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+<h3>3ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+---
+
+<h3>4ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+---
+
+<h3>5ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+---
+
+<h3>6ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+<!-- ===================== -->
+<h3>7ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<!-- ===================== -->
+<h3>8ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<!-- ===================== -->
+<h3>9ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<!-- ===================== -->
+<h3>10ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<h3>11ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<h3>12ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+<h3>13ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+
+<h3>14ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+
+<h3>15ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+
+<h3>16ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>17ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+
+<h3>18ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+
+<h3>19ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+
+<h3>20ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+<h3>21ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>22ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+<h3>23ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+<h3>24ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<h3>25ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+<h3>26ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>27ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Sochaud</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+<h3>28ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaud</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>29ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>30ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+<h3>31ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+  <span>EA Guingamp</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+<h3>32ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>Clermont Foot</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>33ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+  <span>Troyes</span><span class="vs">vs</span><span>Sochaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+  <span>Le Mans FC</span><span class="vs">vs</span><span>Pau FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+  <span>Bordeaux</span><span class="vs">vs</span><span>FC Nantes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+  <span>US Boulogne</span><span class="vs">vs</span><span>Lorient</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+  <span>Auxerre</span><span class="vs">vs</span><span>Rodez</span>
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+  <span>USL Dunkerque</span><span class="vs">vs</span><span>Red Star</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+  <span>SC Bastia</span><span class="vs">vs</span><span>Grenoble</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+  <span>AS Nancy</span><span class="vs">vs</span><span>FC Annecy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+<h3>34ème journée</h3>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png">
+  <span>Clermont Foot</span><span class="vs">vs</span><span>AS Nancy</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png">
+  <span>FC Annecy</span><span class="vs">vs</span><span>SC Bastia</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png">
+  <span>Grenoble</span><span class="vs">vs</span><span>USL Dunkerque</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png">
+  <span>Red Star</span><span class="vs">vs</span><span>Auxerre</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png">
+  <span>Rodez</span><span class="vs">vs</span><span>US Boulogne</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png">
+  <span>Lorient</span><span class="vs">vs</span><span>Bordeaux</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png">
+  <span>FC Nantes</span><span class="vs">vs</span><span>Le Mans FC</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png">
+  <span>Pau FC</span><span class="vs">vs</span><span>Troyes</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png">
+</div>
+
+<div class="match">
+  <img src="https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png">
+  <span>Sochaux</span><span class="vs">vs</span><span>EA Guingamp</span>
+  <img src="https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png">
+</div>
+
+</div>
+
+<script>
+
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* CLUBS */
+const ligue1=["PSG","OM","Lyon","Monaco","Lille","Rennes","Nice","Lens","Strasbourg","Montpellier","Saint-Étienne","Reims","Toulouse","Brest","Metz","Le Havre","Angers","Paris FC"];
+const ligue2=["Nantes","Bordeaux","Auxerre","Clermont Foot","Guingamp","Troyes","USL Dunkerque","Bastia","Grenoble","Annecy","Rodez","Le Mans","Sochaux","AS Nancy","US Boulogne","Lorient","Pau FC","Red Star"];
+
+/* =========================
+   LOGOS CENTRALISÉS (SAFE)
+========================= */
+
+const logos = {};
+
+/* 🔵 LIGUE 1 */
+Object.assign(logos, {
+"PSG": "https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png", "OM": "https://cdn.discordapp.com/attachments/1476499430910726187/1496550478589198518/langfr-330px-Logo_Olympique_Marseille_-_2026.svg.png?ex=69eb9c3e&is=69ea4abe&hm=4c90fce29ce01042f34aa9178cc529d98947d5802340a5889ab841b44c8d85df&", "Lyon": "https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png", "Monaco": "https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png", "Lille": "https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png", "Rennes": "https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png", "Nice": "https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png", "Lens": "https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png", "Strasbourg": "https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png", "Montpellier": "https://assets.football-logos.cc/logos/france/512x512/montpellier.13f3c4cd.png", "Saint-Étienne": "https://cdn.discordapp.com/attachments/1476499430910726187/1486094629467062342/1FBB622C-13D8-42E0-A620-A1101FCD1298.png?ex=69eb2539&is=69e9d3b9&hm=7b6147d679f6b389e2286ed3c8c5cf6a386f748ba1fc90ca8e8666ff8258c08c&", "Reims": "https://assets.football-logos.cc/logos/france/512x512/stade-de-reims.183c72e3.png", "Toulouse": "https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png", "Brest": "https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png", "Metz": "https://assets.football-logos.cc/logos/france/512x512/fc-metz.f7f271f6.png", "Le Havre": "https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png", "Angers": "https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png", "Paris FC": "https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png",
+});
+
+/* 🟡 LIGUE 2 */
+Object.assign(logos, {
+"Nantes": "https://assets.football-logos.cc/logos/france/512x512/nantes.11495901.png", "Bordeaux": "https://assets.football-logos.cc/logos/france/512x512/bordeaux.075d79ca.png", "Auxerre": "https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png", "Clermont Foot": "https://assets.football-logos.cc/logos/france/512x512/clermont-foot.e35da842.png", "Guingamp": "https://assets.football-logos.cc/logos/france/512x512/guingamp.58078315.png", "Troyes": "https://assets.football-logos.cc/logos/france/512x512/troyes.04708692.png", "USL Dunkerque": "https://assets.football-logos.cc/logos/france/512x512/dunkerque.211836d1.png", "Bastia": "https://assets.football-logos.cc/logos/france/512x512/bastia.fe97c559.png", "Grenoble": "https://assets.football-logos.cc/logos/france/512x512/grenoble-foot-38.9bf44782.png", "Annecy": "https://assets.football-logos.cc/logos/france/512x512/annecy.05ddfc7b.png", "Rodez": "https://assets.football-logos.cc/logos/france/1500x1500/rodez-af.a9ee7782.png", "Le Mans": "https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png", "Sochaux": "https://assets.football-logos.cc/logos/france/512x512/sochaux.c7197654.png", "AS Nancy": "https://assets.football-logos.cc/logos/france/512x512/nancy.69db3dfb.png", "US Boulogne": "https://assets.football-logos.cc/logos/france/512x512/boulogne.1cf882eb.png", "Lorient": "https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png", "Pau FC": "https://assets.football-logos.cc/logos/france/512x512/pau.4c7d716a.png", "Red Star": "https://assets.football-logos.cc/logos/france/512x512/red-star-fc.29d0b954.png"
+});
+
+
+/* RESULTATS MANUELS (VIDES, À REMPLIR) */
+const results = {
+  "PSG": [], "OM": [], "Lyon": [], "Monaco": [], "Lille": [], "Rennes": [], "Nice": [], "Lens": [], "Strasbourg": [], "Montpellier": [], "Saint-Étienne": [], "Reims": [], "Toulouse": [], "Brest": [], "Metz": [], "Le Havre": [], "Angers": [], "Paris FC": [],
+  "Nantes": [], "Bordeaux": [], "Auxerre": [], "Clermont Foot": [], "Guingamp": [], "Troyes": [], "USL Dunkerque": [], "Bastia": [], "Grenoble": [], "Annecy": [], "Rodez": [], "Le Mans": [], "Sochaux": [], "AS Nancy": [], "US Boulogne": [], "Lorient": [], "Pau FC": [], "Red Star": []
+};
+
+
+/* CREATE CLUBS */
+function createClubs(list,id){
+let c=document.getElementById(id);
+list.forEach(club=>{
+let div=document.createElement("div");
+div.className="club";
+div.innerHTML=`
+<h3>${club}</h3>
+<img src="${logos[club]}" />
+<div class="details" id="details-${club}"></div>
+`;
+div.onclick=()=>showDetails(club);
+c.appendChild(div);
+});
+}
+
+/* DETAILS */
+function showDetails(club){
+let d=document.getElementById("details-"+club);
+if(!d) return;
+
+d.innerHTML="";
+
+if(results[club] && results[club].length>0){
+results[club].forEach(r=>{
+let span=document.createElement("span");
+span.className="result "+r;
+span.innerText=r;
+d.appendChild(span);
+});
+d.style.display="flex";
+} else {
+d.innerHTML="<span class='result N'>Aucun résultat</span>";
+d.style.display="flex";
+}
+}
+
+/* LIVE MATCH */
+function listenMatches(id){
+let container=document.getElementById(id);
+
+firebase.database().ref("matches").on("value",snap=>{
+container.innerHTML="";
+
+if(!snap.exists()){
+container.innerHTML="<p>Aucun match</p>";
+return;
+}
+
+snap.forEach(child=>{
+let m=child.val();
+let p=document.createElement("p");
+p.innerHTML=`${m.teamA} ${m.scoreA} - ${m.scoreB} ${m.teamB}`;
+container.appendChild(p);
+});
+});
+}
+
+/* UPDATE SCORE */
+function updateScore(){
+let id=document.getElementById("matchId").value;
+let a=document.getElementById("scoreA").value;
+let b=document.getElementById("scoreB").value;
+
+firebase.database().ref("matches/"+id).set({
+teamA:id.split("-")[0],
+teamB:id.split("-")[1],
+scoreA:a,
+scoreB:b
+});
+}
+
+/* UI */
+function toggleAdmin(){
+let p=document.getElementById("adminPanel");
+p.style.display = (p.style.display==="block")?"none":"block";
+}
+
+function showSection(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* INIT */
+createClubs(ligue1,"ligue1Container");
+createClubs(ligue2,"ligue2Container");
+
+let all=[...ligue1,...ligue2];
+let budgets={};
+all.forEach(c=>budgets[c]=Math.floor(Math.random()*80+5)*1000000);
+
+function createBudget(){
+let c=document.getElementById("budgetContainer");
+all.forEach(club=>{
+let d=document.createElement("div");
+d.className="budget-card";
+d.innerHTML=`<h3>${club}</h3><div class='budget-value'>💰 ${budgets[club].toLocaleString()} €</div>`;
+c.appendChild(d);
+});
+}
+
+createBudget();
+listenMatches("matchs1");
+listenMatches("matchs2");
+
+</script>
+
+</body>
+</html>
