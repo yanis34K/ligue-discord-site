@@ -49,14 +49,53 @@
       font-weight: bold;
     }
 
+    /* BARRE DE NAVIGATION (TABS) */
+    .nav-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .nav-btn {
+      background: #1e293b;
+      color: white;
+      border: 1px solid #334155;
+      padding: 10px 24px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .nav-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+    }
+
+    .nav-btn.active {
+      background: #38bdf8;
+      color: #020617;
+      border-color: #38bdf8;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
     .container {
       padding: 20px;
       max-width: 1200px;
       margin: 0 auto;
     }
 
-    /* BARRE DE RECHERCHE */
-    .search-box {
+    /* BARRE DE RECHERCHE ET SÉLECTEURS */
+    .search-box, .select-box {
       width: 100%;
       max-width: 400px;
       margin: 0 auto 30px auto;
@@ -69,9 +108,10 @@
       font-size: 16px;
       outline: none;
       transition: border-color 0.3s ease;
+      text-align-last: center;
     }
 
-    .search-box:focus {
+    .search-box:focus, .select-box:focus {
       border-color: #38bdf8;
     }
 
@@ -142,7 +182,81 @@
     .N { background: #eab308; color: black; }
     .D { background: #ef4444; }
 
-    /* LOGOS DE FOND (ANIMATION PHYSIQUE) */
+    /* =========================================================
+       3. STYLES DU CALENDRIER & MATCHS
+       ========================================================= */
+    .matches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .match-card {
+      background: #1e293b;
+      border-radius: 15px;
+      padding: 15px 25px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 15px;
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.3s ease, background-color 0.2s ease;
+    }
+
+    .match-card:hover {
+      border-color: #38bdf8;
+      background: #334155;
+      transform: translateY(-2px);
+    }
+
+    .team-side {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .team-side.home {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .team-side.away {
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .team-side img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .score-box {
+      background: #0f172a;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 18px;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .match-status {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* LOGOS DE FOND (ANIMATION PHYSIQUE CONTINUED) */
     .logo-bg {
       position: fixed;
       top: 0;
@@ -155,14 +269,14 @@
 
     .bouncing-logo {
       position: absolute;
-      width: 220px;
-      height: 220px;
+      width: 180px;
+      height: 180px;
       object-fit: contain;
       opacity: 0.08;
     }
 
     /* =========================================================
-       3. FENÊTRE POP-UP (MODAL)
+       4. FENÊTRES POP-UP (MODALS)
        ========================================================= */
     .modal-overlay {
       position: fixed;
@@ -187,10 +301,12 @@
       border: 2px solid #38bdf8;
       border-radius: 20px;
       padding: 30px;
-      max-width: 400px;
+      max-width: 500px;
       width: 90%;
       text-align: center;
       position: relative;
+      max-height: 85vh;
+      overflow-y: auto;
       animation: popIn 0.3s ease;
     }
 
@@ -231,6 +347,46 @@
       font-size: 14px;
     }
 
+    .manager-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .action-btn {
+      width: 100%;
+      background: #38bdf8;
+      border: none;
+      color: #020617;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+      margin: 10px 0;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .action-btn:hover { background: #7dd3fc; }
+    .action-btn:active { transform: scale(0.98); }
+
+    .copy-btn {
+      background: #38bdf8;
+      border: none;
+      color: #020617;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover { background: #7dd3fc; }
+    .copy-btn:active { transform: scale(0.95); }
+
     .modal-stats {
       display: flex;
       justify-content: space-around;
@@ -239,21 +395,146 @@
       border-top: 1px solid #334155;
     }
 
-    .stat-box {
+    .stat-box { display: flex; flex-direction: column; }
+    .stat-value { font-size: 18px; font-weight: bold; color: #38bdf8; }
+    .stat-label { font-size: 12px; color: #94a3b8; }
+
+    /* STYLES MODAL EFFECTIF */
+    .squad-section {
+      text-align: left;
+      margin-bottom: 15px;
+      background: #1e293b;
+      padding: 12px 15px;
+      border-radius: 10px;
+    }
+
+    .squad-section-title {
+      color: #38bdf8;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 4px;
+    }
+
+    .squad-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .squad-player {
+      background: #0f172a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+    }
+
+    /* STYLES MODAL MATCH (STATS DU MATCH) */
+    .match-header-modal {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .team-modal-side {
       display: flex;
       flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-weight: bold;
+      font-size: 14px;
     }
 
-    .stat-value {
-      font-size: 18px;
+    .team-modal-side img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+    }
+
+    .score-modal-box {
+      font-size: 26px;
       font-weight: bold;
       color: #38bdf8;
+      background: #1e293b;
+      padding: 8px 18px;
+      border-radius: 12px;
+      border: 1px solid #334155;
     }
 
-    .stat-label {
+    /* BUTS & PASSEURS */
+    .goals-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 10px;
       font-size: 12px;
-      color: #94a3b8;
+      margin-bottom: 15px;
+      text-align: left;
     }
+
+    .goals-home { text-align: left; }
+    .goals-away { text-align: right; }
+
+    .goal-item { margin-bottom: 6px; }
+    .assist-item { color: #94a3b8; font-size: 11px; font-style: italic; }
+
+    /* HOMME DU MATCH */
+    .motm-box {
+      background: #1e293b;
+      border: 1px solid #eab308;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .motm-title {
+      color: #eab308;
+      font-weight: bold;
+      margin-bottom: 3px;
+    }
+
+    .motm-desc {
+      color: #94a3b8;
+      font-size: 11px;
+      font-style: italic;
+    }
+
+    /* LIGNES STATISTIQUES */
+    .stat-row {
+      margin-bottom: 12px;
+    }
+
+    .stat-row-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .stat-title { color: #94a3b8; font-size: 12px; }
+
+    .bar-container {
+      height: 8px;
+      background: #1e293b;
+      border-radius: 4px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .bar-home { background: #38bdf8; height: 100%; }
+    .bar-away { background: #ef4444; height: 100%; }
   </style>
 </head>
 
@@ -267,29 +548,65 @@
 
   <header>⚽ LIGUE 1 DISCORD ⚽</header>
 
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="switchTab('clubs', event)">🛡️ Équipes</button>
+    <button class="nav-btn" onclick="switchTab('calendar', event)">📅 Calendrier & Résultats</button>
+  </div>
+
   <!-- LOGOS REBONDISSANTS EN FOND -->
   <div class="logo-bg">
-    <!-- Logo 1: Ligue 1 -->
     <img id="logo1" class="bouncing-logo" src="https://assets.football-logos.cc/logos/france/512x512/ligue-1--white.4072671a.png" alt="Ligue 1">
-    <!-- Logo 2: LFP -->
     <img id="logo2" class="bouncing-logo" src="https://www.lfp.fr/_next/image?url=https%3A%2F%2Fwww.lfp.fr%2Fassets%2FLFP_e5d2655ef3.jpg&w=1920&q=75" alt="LFP">
+    <img id="logo3" class="bouncing-logo" src="https://th.bing.com/th/id/R.8ebe3e57e3e3f05204d02982b6770931?rik=b2WYsgwEwJKCEg&riu=http%3a%2f%2fpngimg.com%2fuploads%2fmcdonalds%2fmcdonalds_PNG17.png&ehk=a6cfXksYj0D%2f0lQjY7HzJSAaoFORKRNd5UGjH5OK6Bg%3d&risl=&pid=ImgRaw&r=0" alt="McDonalds">
   </div>
 
   <div class="container">
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Rechercher une équipe..." oninput="filterClubs()">
-    <div class="grid" id="ligue1Container"></div>
+    
+    <!-- ONGLET 1: ÉQUIPES -->
+    <div id="tab-clubs" class="tab-content active">
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Rechercher une équipe..." oninput="filterClubs()">
+      <div class="grid" id="ligue1Container"></div>
+    </div>
+
+    <!-- ONGLET 2: CALENDRIER & RÉSULTATS -->
+    <div id="tab-calendar" class="tab-content">
+      <select id="daySelect" class="select-box" onchange="renderMatches()">
+        <option value="6" selected>6ème Journée (Terminée)</option>
+        <option value="7">7ème Journée</option>
+        <option value="8">8ème Journée</option>
+        <option value="9">9ème Journée</option>
+        <option value="10">10ème Journée</option>
+        <option value="11">11ème Journée</option>
+        <option value="12">12ème Journée</option>
+        <option value="13">13ème Journée</option>
+        <option value="14">14ème Journée</option>
+        <option value="15">15ème Journée</option>
+        <option value="16">16ème Journée</option>
+      </select>
+      <div class="matches-list" id="matchesContainer"></div>
+    </div>
+
   </div>
 
-  <!-- MODAL -->
-  <div class="modal-overlay" id="clubModal" onclick="closeModal()">
+  <!-- MODAL ÉQUIPE -->
+  <div class="modal-overlay" id="clubModal" onclick="closeModal('clubModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <button class="close-btn" onclick="closeModal()">✖</button>
+      <button class="close-btn" onclick="closeModal('clubModal')">✖</button>
       <img id="mLogo" class="modal-logo" src="" alt="">
       <div id="mTitle" class="modal-title"></div>
+
+      <!-- BOUTON ACCÈS EFFECTIF -->
+      <button class="action-btn" onclick="openSquadModal()">📋 Voir l'effectif complet</button>
       
-      <div class="modal-info">
-        👑 <b>Président :</b> <span id="mManager">Non attribué</span>
+      <div class="modal-info manager-box">
+        <div style="text-align: left;">
+          👑 <b>Président :</b> <br>
+          <span id="mManager" style="color: #38bdf8; font-weight: bold;">Non attribué</span>
+        </div>
+        <button id="copyBtn" class="copy-btn" onclick="copyDiscordContact()">📋 Copier contact</button>
       </div>
+
       <div class="modal-info">
         🏆 <b>Équipe du mois :</b> <span id="mMonthBadges">0</span>
       </div>
@@ -315,173 +632,717 @@
     </div>
   </div>
 
+  <!-- MODAL EFFECTIF -->
+  <div class="modal-overlay" id="squadModal" onclick="closeModal('squadModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal('squadModal')">✖</button>
+      <img id="squadLogo" class="modal-logo" src="" alt="">
+      <div id="squadTitle" class="modal-title" style="margin-bottom: 20px;"></div>
+
+      <div id="squadContainer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL STATISTIQUES DU MATCH -->
+  <div class="modal-overlay" id="matchModal" onclick="closeModal('matchModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="close-btn" onclick="closeModal('matchModal')">✖</button>
+      
+      <div class="match-header-modal">
+        <div class="team-modal-side">
+          <img id="matchHomeLogo" src="" alt="">
+          <span id="matchHomeName">Domicile</span>
+        </div>
+        <div>
+          <div id="matchScoreModal" class="score-modal-box">0 - 0</div>
+          <div id="matchStatusModal" style="font-size: 11px; color: #94a3b8; margin-top: 5px;">TERMINÉ</div>
+        </div>
+        <div class="team-modal-side">
+          <img id="matchAwayLogo" src="" alt="">
+          <span id="matchAwayName">Extérieur</span>
+        </div>
+      </div>
+
+      <!-- SECTION BUTEURS & PASSEURS -->
+      <div class="goals-container" id="goalsContainer">
+        <div class="goals-home" id="goalsHome"></div>
+        <div class="goals-away" id="goalsAway"></div>
+      </div>
+
+      <!-- HOMME DU MATCH -->
+      <div class="motm-box" id="motmBox" style="display: none;">
+        <div class="motm-title" id="motmTitle">⭐ Homme du match : </div>
+        <div class="motm-desc" id="motmDesc"></div>
+      </div>
+
+      <!-- STATISTIQUES DU MATCH -->
+      <div id="statsList"></div>
+    </div>
+  </div>
+
   <script>
     /* ---------------------------------------------------------
-       1. DONNÉES DES CLUBS
-       --------------------------------------------------------- */
-    const clubsData = [
-      { name: 'Olympique de Marseille', logo: 'https://assets.football-logos.cc/logos/france/512x512/marseille.f89278df.png',        form: ['V', 'V', 'V', 'V', 'N', 'N'], manager: 'Non attribué', monthBadges: 1 },
-      { name: 'RC Strasbourg',         logo: 'https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png', form: ['V', 'V', 'V', 'V', 'N', 'N'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Paris Saint-Germain',   logo: 'https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png', form: ['V', 'V', 'V', 'V', 'N', 'N'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Olympique Lyonnais',    logo: 'https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png',             form: ['V', 'V', 'V', 'V', 'N', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'RC Lens',               logo: 'https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png',            form: ['V', 'V', 'V', 'N', 'N', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'LOSC Lille',            logo: 'https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png',             form: ['V', 'V', 'V', 'N', 'N', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'AS Monaco',             logo: 'https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png',          form: ['V', 'V', 'V', 'N', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Stade Rennais',         logo: 'https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png',          form: ['V', 'V', 'V', 'N', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Toulouse FC',           logo: 'https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png',          form: ['V', 'V', 'V', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'ESTAC Troyes',          logo: 'https://assets.footylogos.com/previews/troyes/troyes-logo-footylogos-1200.webp',        form: ['V', 'V', 'N', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Paris FC',              logo: 'https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png',           form: ['V', 'V', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Angers SCO',            logo: 'https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png',            form: ['V', 'V', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Le Mans',               logo: 'https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png',           form: ['V', 'V', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Stade Brestois',        logo: 'https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png',           form: ['V', 'V', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'OGC Nice',              logo: 'https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png',              form: ['V', 'N', 'N', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Le Havre AC',           logo: 'https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png',        form: ['V', 'N', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'AJ Auxerre',            logo: 'https://assets.football-logos.cc/logos/france/512x512/aj-auxerre.84df3014.png',        form: ['V', 'N', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 },
-      { name: 'Lorient',               logo: 'https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png',           form: ['V', 'D', 'D', 'D', 'D', 'D'], manager: 'Non attribué', monthBadges: 0 }
-    ];
-
-    /* ---------------------------------------------------------
-       2. MOTEUR PHYSIQUE AVEC COLLISION ENTRE LOGOS (LIGUE 1 & LFP)
+       1. ANIMATION PHYSIQUE DES LOGOS (REBOND CONTINU)
        --------------------------------------------------------- */
     const logos = [
-      {
-        el: document.getElementById('logo1'),
-        x: 100,
-        y: 100,
-        vx: 1.5,
-        vy: 1.2,
-        size: 220
+      { id: 'logo1', x: 50, y: 50, dx: 1.5, dy: 1.2 },
+      { id: 'logo2', x: 300, y: 200, dx: -1.2, dy: 1.6 },
+      { id: 'logo3', x: 600, y: 100, dx: 1.4, dy: -1.3 }
+    ];
+
+    function animateLogos() {
+      const width = window.innerWidth - 180;
+      const height = window.innerHeight - 180;
+
+      logos.forEach(l => {
+        let el = document.getElementById(l.id);
+        if (el) {
+          l.x += l.dx;
+          l.y += l.dy;
+
+          if (l.x <= 0 || l.x >= width) l.dx *= -1;
+          if (l.y <= 0 || l.y >= height) l.dy *= -1;
+
+          el.style.transform = `translate(${l.x}px, ${l.y}px)`;
+        }
+      });
+
+      requestAnimationFrame(animateLogos);
+    }
+
+    window.onload = () => {
+      animateLogos();
+    };
+
+    /* ---------------------------------------------------------
+       2. DONNÉES DES CLUBS ET EFFECTIFS
+       --------------------------------------------------------- */
+    const clubsData = [
+      { 
+        name: 'FC Lorient', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/lorient.7dde32cc.png', 
+        form: ['V', 'D', 'D', 'D', 'D', 'D'], 
+        manager: 'rios_jsp', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Yvon Mvogo', 'Bingourou Kamara', 'Benjamin Leroy'],
+          def: ['Montassar Talbi', 'Formose Mendy', 'Nathaniel Adjei', 'Isaak Toure', 'Enzo Genton', 'Arsène Kouassi', 'Dembo Sylla', 'Alec Georgen'],
+          mid: ['Arthur Avom', 'Noah Cadiou', 'Théo Le Bris', 'Panos Katseris', 'Joël Mvuka', 'Jean-Victor Makengo', 'Gabin Bernardeau', 'Bandiougou Fadiga'],
+          att: ['Jeremy Hatchi', 'Mohamed Bamba', 'Aiyegun Tosin']
+        }
       },
-      {
-        el: document.getElementById('logo2'),
-        x: window.innerWidth - 300,
-        y: window.innerHeight - 300,
-        vx: -1.3,
-        vy: -1.4,
-        size: 220
+      { 
+        name: 'OGC Nice', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/nice.be285080.png', 
+        form: ['V', 'N', 'N', 'D', 'D', 'D'], 
+        manager: 'lco274', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Yehvann Diouf', 'Teddy Boulhendi'],
+          def: ['Antoine Mendy', 'Kojo Peprah Oppong', 'Youssouf Ndayishimiye', 'Moise Bombito', 'Mattia Viti', 'Mohamed Abdelmomen', 'Melvin Bard', 'Ali Abdi', 'Jonathan Clauss', 'Hamza Koutoune'],
+          mid: ['Salis Abdul Samed', 'Everton', 'Laurent Abergel', 'Hicham Boudaoui', 'Morgan Sanson', 'Djibril Coulibaly', 'Issiaga Camara', 'Tom Louchet', 'Rares Ilie'],
+          att: ['Sofiane Diop', 'Isak Jansson', 'Mohamed-Ali Cho', 'Terem Moffi', 'Kevin Carlos', 'Victor Orakpo']
+        }
+      },
+      { 
+        name: 'Angers SCO', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/angers.bb65fb9c.png', 
+        form: ['V', 'V', 'D', 'D', 'D', 'D'], 
+        manager: 'nemo49330', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Anthony Lopes', 'Melvin Zinga', 'Oumar Pona'],
+          def: ['Ousmane Camara', 'Emmanuel Biumla', 'Jordan Lefort', 'Jacques Ekomie', 'Dan Sinaté', 'Lilian Raolisoa', 'Marius Louer', 'Carlens Arcus'],
+          mid: ['Marius Courcoul', 'Yassin Belkhdim', 'Branco Van den Boomen', 'Haris Belkebla', 'Louis Mouton'],
+          att: ['Amine Sbai', 'Anthony Bermont', 'Harouna Djibrin', 'Jim Allevinah', 'Prosper Peter', 'Amine El Ouazzani', 'Lanroy Machine', 'Usmane Simbakoli']
+        }
+      },
+      { 
+        name: 'Le Havre AC', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/le-havre-ac.1950fe12.png', 
+        form: ['V', 'N', 'D', 'D', 'D', 'D'], 
+        manager: 'matheo1476', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Mory Diaw', 'Lionel M’pasi', 'Paul Argney'],
+          def: ['Ayumu Seko', 'Stephan Zagadou', 'Vincent Sasso', 'Yanis Zouaoui', 'Enzo Koffi', 'Fode Doucoure', 'Timothée Pembele'],
+          mid: ['Daren Modengo', 'Rassoul Ndiaye', 'Simon Ebonog', 'Amir Richarson', 'Kaita Mizuta'],
+          att: ['Félix Mambimbi', 'Godson Kyeremeh', 'Noam Obougou', 'Soya Nakamura', 'Mbwana Samatta']
+        }
+      },
+      { 
+        name: 'AJ Auxerre', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/auxerre.e475acaa.png', 
+        form: ['V', 'N', 'D', 'D', 'D', 'D'], 
+        manager: 'Lukas', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Mamadou Diop', 'Paul Nardy'],
+          def: ['Clément Akpa', 'Sinaly Diomande', 'Bryan Okoh', 'Francisco Sieralta', 'Telli Siwe', 'Christ Makosso', 'Fredrik Oppegard', 'Sékou Fofana', 'Marvin Senaya', 'Lamine Sy'],
+          mid: ['Elisha Owusu', 'Arthur Piedfort', 'Assane Diousse', 'Kevin Danois', 'Naouirou Ahamada', 'Tidiane Devernois', 'Romain Faivre'],
+          att: ['Danny Namaso', 'Aristide Zossou', 'Josue Casimir', 'Lasso Coulibaly', 'Éros Maddy', 'Théo Bair', 'Ryan Rodin', 'Xiangxin Wei']
+        }
+      },
+      { 
+        name: 'ESTAC Troyes', 
+        logo: 'https://assets.footylogos.com/previews/troyes/troyes-logo-footylogos-1200.webp', 
+        form: ['V', 'V', 'N', 'D', 'D', 'D'], 
+        manager: 'Non attribué', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Patrick Beach', 'Hillel Konate', 'Zacharie Boucher'],
+          def: ['Junior Diaz', 'Sankhoun Diawara', 'Adrien Monfray', 'Ismaël Boura', 'Anis Ouzenadji', 'Yvann Titi', 'Lucas Maronnier', 'Thierno Balde'],
+          mid: ['Alexandre Philiponeau', 'Mouhamed Diop', 'Antoine Mille', 'Iron Gomis'],
+          att: ['Kandet Diawara', 'Amar Fatah', 'Elijah Odede', 'Merwan Ifnaoui', 'Renaud Ripard']
+        }
+      },
+      { 
+        name: 'Le Mans', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/le-mans.103d37a2.png', 
+        form: ['V', 'V', 'D', 'D', 'D', 'D'], 
+        manager: 'alexx_tms1', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Nicolas Kocik', 'Ewan Hatfout'],
+          def: ['Noa Boissé', 'Théo Eyoum', 'Harold Voyer', 'Samuel Yohou', 'Lucas Calodat', 'Yasser Larouci', 'Lucas Buaddes'],
+          mid: ['Lucas Bretelle', 'Alexandre Laury', 'Milan Robin', 'Edwin Quarshie', 'Adil Bourabaa', 'Jean Vercruysse', 'Martin Rossignol'],
+          att: ['Erwan Colas', 'Billal Brahimi', 'Louis Mafouta', 'Antoine Rabillard', 'Dame Gueye', 'William Harhouz']
+        }
+      },
+      { 
+        name: 'Paris Saint-Germain', 
+        logo: 'https://assets.football-logos.cc/logos/france/1500x1500/paris-saint-germain.3259f37e.png', 
+        form: ['V', 'V', 'V', 'V', 'N', 'N'], 
+        manager: 'veytox0_13162', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Matvey Safonov', 'Lucas Chevalier', 'Alessandro Longoni'],
+          def: ['Willian Pacho', 'Ilya Zabarnyi', 'Marquinhos', 'Lucas Beraldo', 'Nuno Mendes', 'Lucas Hernandez', 'Lucas Digne', 'Achraf Hakimi', 'Naoufel El Hannach'],
+          mid: ['Vitinha', 'Joao Neves', 'Warren Zaïre-Emery', 'Senny Mayulu', 'Dro Fernandez', 'Fabien Ruiz', 'Renato Sanches', 'Lang In Lee'],
+          att: ['Khivicha Kvaratshkhelia', 'Bradley Barcola', 'Quentin Ndjantou', 'Ibrahim Mbaye', 'Ousmane Dembele', 'Randal Kolo Muani', 'Désiré Doué']
+        }
+      },
+      { 
+        name: 'Olympique de Marseille', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/marseille.f89278df.png', 
+        form: ['V', 'V', 'V', 'V', 'N', 'N'], 
+        manager: 'Non attribué', 
+        monthBadges: 1,
+        squad: {
+          gk: ['Geronimo Rulli', 'Jeffrey De L’ange', 'Jelle Van Neck'],
+          def: ['Leonardo Balerdi', 'Facundo Medina', 'Nayef Aguerd', 'CH Egan Riley', 'Bamo Meite', 'Derek Cornelius', 'Emerson', 'Ulisses Garcia'],
+          mid: ['Pierre Émile Hojbjerg', 'Tochukwu Nnadi', 'Geoffrey Kondegbia', 'Quinten Timber', 'Timothy Weah', 'Angel Gomes', 'Himad Abdelli'],
+          att: ['Igor Paixao', 'Amine Harit', 'Amine Gouiri', 'Nael Maupay', 'Faris Moumbagna']
+        }
+      },
+      { 
+        name: 'Olympique Lyonnais', 
+        logo: 'https://assets.football-logos.cc/logos/france/1500x1500/lyon.05fe1f9a.png', 
+        form: ['V', 'V', 'V', 'V', 'N', 'D'], 
+        manager: 'teroxx0254', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Dominik Greif', 'Remy Descamps', 'Justin Bengui', 'Lassine Diarra'],
+          def: ['Moussa Niakhaté', 'Ruben Kluivert', 'Noham Kamara', 'Duje Caletar-Car', 'Clinton Mata', 'Abner', 'Nicolas Tagliafico', 'Mohamed Ouedraogo', 'Ainsley Maitland-Niles', 'Steeve Kango'],
+          mid: ['Tyler Morton', 'Tanner Tessmann', 'Orel Mangala', 'Mathys De Carvalho', 'Paul Akouokou', 'Khalis Merah', 'Mass Bidstrup', 'Corentin Tolisso', 'Mahamadou Diawarra', 'Pavel Sulc', 'Noah Nartey'],
+          att: ['Malick Fofana', 'Rémi Humbert', 'Julien Duranville', 'Ernest Nuamah', 'Kail Boudache', 'Enzo Molebe', 'Alejandro Gomes Rodriguez']
+        }
+      },
+      { 
+        name: 'AS Monaco', 
+        logo: 'https://assets.football-logos.cc/logos/france/700x700/as-monaco.b63e9cff.png', 
+        form: ['V', 'V', 'V', 'N', 'D', 'D'], 
+        manager: 'EM34_', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Philipp Kohn', 'Lukas Hradecky', 'Yann Lienard'],
+          def: ['Christian Mawissa', 'Thilo Kehrer', 'Mohammed Salisu', 'Sadibou Sane', 'Éric Dier', 'Nazinho', 'Vanderson', 'Jordan Teze'],
+          mid: ['Denis Zakaria', 'Amadou Bamba', 'Lamine Camara', 'Mamadou Coulibaly', 'Edan Diop', 'Paul Pogba', 'Aleksandr Golovin', 'Stanis Idumbo'],
+          att: ['Mathys Detourbet', 'Ansu Fati', 'Takumi Minamino', 'Lucas Michel', 'Mahgnes Akliouche', 'Folarin Balogun', 'Mika Biereth', 'Paris Brunner']
+        }
+      },
+      { 
+        name: 'RC Lens', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/rc-lens.5370d47c.png', 
+        form: ['V', 'V', 'V', 'N', 'N', 'D'], 
+        manager: 'theo019606', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Robin Risser', 'Hervé Koffi', 'Mathieu Gorgelin', 'Regis Gurtner', 'Ilan Jourdren'],
+          def: ['Samson Baidoo', 'Ismaëlo Ganiou', 'Nidal Celik', 'Kylian Antonio', 'Jonathan Gradit', 'Maik Nawrocki', 'Souleymane Sagnan', 'Mathieu Udol', 'Johanner Chavez', 'Sais Abdulhamidz', 'Ruben Aguilar'],
+          mid: ['Mamadou Sangare', 'Andrija Bulatovic', 'Amadou Haidara', 'Michael Cuisance', 'Thorgan Hazard'],
+          att: ['Abdallah Sima', 'Michael Skoras', 'Florian Thauvin', 'Odsonne Edouard', 'Ryan Fofana', 'Remy Labeau Lascary', 'Florian Soroca', 'Erawan Garnier']
+        }
+      },
+      { 
+        name: 'LOSC Lille', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/lille.71772c6d.png', 
+        form: ['V', 'V', 'V', 'N', 'N', 'D'], 
+        manager: 'mesty_59', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Berne Ozer', 'Arnaud Bodart'],
+          def: ['Alexsandro', 'Issac Cossier', 'Tanguy Nianzou', 'Ousmane Touré', 'Romain Perraud', 'Calvin Verdonk', 'Tiago Santos', 'Loun Srdanovic'],
+          mid: ['Ngal’ayel Mukau', 'Benjamin André', 'Ici Raghouber', 'Ayyoub Bouaddi', 'Hakon Haraldsson'],
+          att: ['Félix Correia', 'Osame Sahraoui', 'Basar Onal', 'Ethan Mbappé', 'Marius Broholm', 'Noah Edjouma', 'Gaétan Perrin', 'Matias Fernandez Pardo', 'Hamza Igamane', 'Mohamed Bayo', 'Olivier Giroud']
+        }
+      },
+      { 
+        name: 'RC Strasbourg', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/rc-strasbourg-alsace.58bd7116.png', 
+        form: ['V', 'V', 'V', 'V', 'N', 'N'], 
+        manager: 'bois_vert10_78146', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Milosz Piekutowski'],
+          def: ['Ismael Doucoure', 'Lucas Hogsberg', 'Andrew Omobamidele', 'Soumaila Coulibaly', 'Saidou Sow', 'Abakar Sylla', 'Yoni Gomis', 'Ben Chilwell', 'Mateo Del Blanco', 'Guela Doué', 'Abdoul Ouattara'],
+          mid: ['Diogo Souza', 'Junior Mwanga', 'Maxi Oyedele', 'Pape Diong', 'Rabby Nzingoula', 'Samir El Mourabet', 'Pape Diop', 'Mathis Amougou', 'Diego Moreira', 'Julio Enciso', 'Benjamin Brantlind'],
+          att: ['Martial Godo', 'Sebastian Nanasi', 'Rayane Messi', 'Oscar Perea', 'Gessime Yassine', 'Samuel Amo Ameyaw', 'Joaquin Panichelli', 'Sékou Mara', 'Milos Lukovic']
+        }
+      },
+      { 
+        name: 'Stade Rennais', 
+        logo: 'https://assets.football-logos.cc/logos/france/1500x1500/rennes.f07dde44.png', 
+        form: ['V', 'V', 'V', 'N', 'D', 'D'], 
+        manager: 'peio64_', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Brice Samba', 'Nicolas Lemaitre', 'Kilian Belazzoug'],
+          def: ['Lilian Brassier', 'Anthony Rouault', 'Alidu Seidu', 'Mikayil Faye', 'Gonçalo Oliveira', 'Jonathan Do Marcolino', 'Quentin Merlin', 'Mahamadou Nagida', 'Przemyslaw Frankowski', 'Bryan Reynold', 'Rayan Bamba', 'Abdelhamid ait boudlal'],
+          mid: ['Jordan James', 'Mahdi Camara', 'Djaoui Cisse', 'Seko Fofana', 'Valentin Rongier', 'Adrien Thomasson', 'Glen Kamara', 'Ludovic Blas', 'Sebastian Szymanski', 'Ayanda Sishuba'],
+          att: ['Issa Soumare', 'Moussa Al-Taamari', 'Arnaud Nordin', 'Elias Quinonez', 'Nodan Mukiele', 'Esteban Lepaul', 'Eliezer Mayenda', 'Breel Embolo', 'Yassir Zabiri']
+        }
+      },
+      { 
+        name: 'Paris FC', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/paris-fc.63e29830.png', 
+        form: ['V', 'V', 'D', 'D', 'D', 'D'], 
+        manager: 'jbwant', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Obed Nkambadio', 'Kevin Trapp'],
+          def: ['Diego Coppola', 'Otavio', 'Moustapha Mbow', 'Samir Chergui', 'Yoan Koré', 'Nhoa Sangui', 'Thibault De Smet', 'Tuomas Ollila', 'Emmanuel Mbemba', 'Hamari Traore', 'Mathys Tourraine'],
+          mid: ['Maxime Lopez', 'Pierre Lees-Melou', 'Adama Camara', 'Patrick Zabi', 'Rudy Matondo', 'Vincent Marchetti'],
+          att: ['Pablo Pagis', 'Moses Simon', 'Alimani Gory', 'Ilan Kebbal', 'Jonathan Ikone', 'Lassine Sinayoko', 'Willem Geubbels', 'Jean-Philippe Krasso', 'Ciro Immobile', 'Omar Sissoko']
+        }
+      },
+      { 
+        name: 'Toulouse FC', 
+        logo: 'https://assets.football-logos.cc/logos/france/512x512/toulouse.b40bb3e2.png', 
+        form: ['V', 'V', 'V', 'D', 'D', 'D'], 
+        manager: 'starfishbumblees', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Guillaume Restes', 'Mathys Niflore'],
+          def: ['Charlie Cresswell', 'Mark McKenzie', 'Rasmus Nicolaisen', 'Seny Koumbassa', 'Dayann Methalie', 'Christ Tape', 'Ylies Aradj', 'Rafik Messali', 'Ismail Diallo'],
+          mid: ['Alexis Vossah', 'Christian Casseres Jr', 'Abu Francis', 'Niklas Schmidt', 'Mario Sauer', 'Aron Donnum', 'Mathis Saka'],
+          att: ['Yann Gboho', 'Santiago Hidalgo', 'Jacen Russell-Rowe', 'Julian Vitolo', 'Enzo Faty', 'Ilyas Azizi']
+        }
+      },
+      { 
+        name: 'Stade Brestois', 
+        logo: 'https://assets.football-logos.cc/logos/france/1500x1500/brest.b0b54212.png', 
+        form: ['V', 'V', 'D', 'D', 'D', 'D'], 
+        manager: 'aryn_070', 
+        monthBadges: 0,
+        squad: {
+          gk: ['Grégoire Coudert', 'Noé Poillion', 'Noah Jauny'],
+          def: ['Brendan Chardonnet', 'Raphaël Le Guen', 'Bradley Locko', 'Justin Bourgault', 'Kenny Lala', 'Luck Zogbe'],
+          mid: ['Joris Chotard', 'Hamidou Makalou', 'Hugo Magnetti', 'Lucas Tousart', 'Kamory Doumbia'],
+          att: ['Pathé Mboup', 'Romain Del Castillo', 'Axel Camblan', 'Mama Balde', 'Ludovic Ajorque']
+        }
       }
     ];
 
-    function updatePhysics() {
-      const sw = window.innerWidth;
-      const sh = window.innerHeight;
-
-      // 1. Déplacement & rebonds sur les bords d'écran
-      logos.forEach(l => {
-        l.x += l.vx;
-        l.y += l.vy;
-
-        if (l.x <= 0 || l.x + l.size >= sw) {
-          l.vx *= -1;
-          l.x = Math.max(0, Math.min(l.x, sw - l.size));
+    /* ---------------------------------------------------------
+       3. DONNÉES DU DISCORD (MATCHS)
+       --------------------------------------------------------- */
+    const matchesData = {
+      6: [
+        { 
+          home: 'Olympique de Marseille', away: 'OGC Nice', scoreHome: 3, scoreAway: 3, status: 'Terminé',
+          motm: 'Vinicius Jr (OM)', motmDesc: 'Un doublé exceptionnel dans un match complètement fou.',
+          stats: { xg: [2.7, 2.1], shots: [14, 11], shotsOnTarget: [7, 5], possession: [55, 45], passes: [480, 410], fouls: [10, 12], red: [0, 0] },
+          goalsHome: [
+            { name: 'Vinicius Jr (x2)', assist: 'Angel Gomes (x2)' },
+            { name: 'Amine Gouiri', assist: 'Tim Weah' }
+          ],
+          goalsAway: [
+            { name: 'Mika Biereth', assist: 'Sofiane Diop' },
+            { name: 'Terem Moffi', assist: 'Jonathan Clauss' },
+            { name: 'Kingsley Coman', assist: 'Melvin Bard' }
+          ]
+        },
+        { 
+          home: 'AJ Auxerre', away: 'FC Lorient', scoreHome: 1, scoreAway: 3, status: 'Terminé',
+          motm: 'João Félix (Lorient)', motmDesc: 'Un but et une passe décisive pour guider Lorient vers la victoire.',
+          stats: { xg: [0.9, 2.4], shots: [8, 15], shotsOnTarget: [3, 8], possession: [42, 58], passes: [390, 520], fouls: [14, 9], red: [0, 0] },
+          goalsHome: [
+            { name: 'Lasso Coulibaly', assist: 'Elisha Owusu' }
+          ],
+          goalsAway: [
+            { name: 'Vangelis Pavlidis (x2)', assist: 'João Félix, Arthur Avom' },
+            { name: 'João Félix', assist: 'Panos Katseris' }
+          ]
+        },
+        { 
+          home: 'Stade Brestois', away: 'Toulouse FC', scoreHome: 3, scoreAway: 2, status: 'Terminé',
+          motm: 'Romain Del Castillo (Brest)', motmDesc: 'Un but et deux passes décisives dans une grande performance.',
+          stats: { xg: [2.2, 1.6], shots: [12, 10], shotsOnTarget: [6, 4], possession: [50, 50], passes: [440, 435], fouls: [11, 13], red: [0, 0] },
+          goalsHome: [
+            { name: 'Ludovic Ajorque (x2)', assist: 'Romain Del Castillo (x2)' },
+            { name: 'Romain Del Castillo', assist: 'Kenny Lala' }
+          ],
+          goalsAway: [
+            { name: 'Yann Gboho', assist: 'Aron Dønnum' },
+            { name: 'Santiago Hidalgo', assist: 'Cristian Cásseres Jr.' }
+          ]
+        },
+        { 
+          home: 'AS Monaco', away: 'Le Havre AC', scoreHome: 2, scoreAway: 1, status: 'Terminé',
+          motm: 'Maghnes Akliouche (Monaco)', motmDesc: 'Un poison constant entre les lignes.',
+          stats: { xg: [2.5, 0.8], shots: [16, 6], shotsOnTarget: [8, 2], possession: [62, 38], passes: [580, 310], fouls: [8, 15], red: [0, 0] },
+          goalsHome: [
+            { name: 'Folarin Balogun', assist: 'Vanderson' },
+            { name: 'Maghnes Akliouche', assist: 'Aleksandr Golovin' }
+          ],
+          goalsAway: [
+            { name: 'Luuk de Jong', assist: 'Amir Richardson' }
+          ]
+        },
+        { 
+          home: 'ESTAC Troyes', away: 'Angers SCO', scoreHome: 1, scoreAway: 3, status: 'Terminé',
+          motm: 'Prosper Peter (Angers)', motmDesc: 'Encore un doublé décisif pour offrir la victoire à Angers.',
+          stats: { xg: [1.0, 2.6], shots: [9, 13], shotsOnTarget: [4, 7], possession: [48, 52], passes: [410, 460], fouls: [12, 10], red: [0, 0] },
+          goalsHome: [
+            { name: 'Renaud Ripart', assist: 'Mouhamed Diop' }
+          ],
+          goalsAway: [
+            { name: 'Prosper Peter (x2)', assist: 'Branco van den Boomen (x2)' },
+            { name: 'Esteban Lepaul', assist: 'Nicolás Tagliafico' }
+          ]
+        },
+        { 
+          home: 'RC Strasbourg', away: 'Le Mans', scoreHome: 6, scoreAway: 1, status: 'Terminé',
+          motm: 'Odsonne Édouard (Strasbourg)', motmDesc: 'Un triplé monumental pour une démonstration offensive.',
+          stats: { xg: [4.5, 0.6], shots: [22, 5], shotsOnTarget: [12, 2], possession: [65, 35], passes: [610, 290], fouls: [7, 11], red: [0, 0] },
+          goalsHome: [
+            { name: 'Odsonne Édouard (x3)', assist: 'Sebastian Nanasi (x2), Guéla Doué' },
+            { name: 'Sebastian Nanasi (x2)', assist: 'Gessime Yassine, Habib Diarra' },
+            { name: 'Gessime Yassine', assist: '-' }
+          ],
+          goalsAway: [
+            { name: 'Erwan Colas', assist: 'Vincent Marchetti' }
+          ]
+        },
+        { 
+          home: 'RC Lens', away: 'Stade Rennais', scoreHome: 2, scoreAway: 1, status: 'Terminé',
+          motm: 'Florian Thauvin (Lens)', motmDesc: 'Le but de la victoire dans un Bollaert en folie.',
+          stats: { xg: [1.9, 1.1], shots: [11, 9], shotsOnTarget: [5, 3], possession: [49, 51], passes: [450, 470], fouls: [15, 14], red: [0, 0] },
+          goalsHome: [
+            { name: 'Victor Boniface', assist: 'Thorgan Hazard' },
+            { name: 'Florian Thauvin', assist: 'Saud Abdulhamid' }
+          ],
+          goalsAway: [
+            { name: 'Ansu Fati', assist: 'Ludovic Blas' }
+          ]
+        },
+        { 
+          home: 'Paris FC', away: 'Paris Saint-Germain', scoreHome: 1, scoreAway: 2, status: 'Terminé',
+          motm: 'Vitinha (PSG)', motmDesc: 'Le patron du milieu parisien avec une grande influence.',
+          stats: { xg: [0.7, 2.5], shots: [7, 18], shotsOnTarget: [3, 9], possession: [36, 64], passes: [340, 680], fouls: [13, 8], red: [0, 0] },
+          goalsHome: [
+            { name: 'Julián Quiñones', assist: 'Pablo Pagis' }
+          ],
+          goalsAway: [
+            { name: 'Ousmane Dembélé', assist: 'Vitinha' },
+            { name: 'Khvicha Kvaratskhelia', assist: 'Désiré Doué' }
+          ]
+        },
+        { 
+          home: 'Olympique Lyonnais', away: 'LOSC Lille', scoreHome: 2, scoreAway: 2, status: 'Terminé',
+          motm: 'Erling Haaland (OL)', motmDesc: 'Toujours aussi clinique devant les cages.',
+          stats: { xg: [1.8, 1.7], shots: [13, 12], shotsOnTarget: [6, 5], possession: [51, 49], passes: [490, 480], fouls: [11, 12], red: [0, 0] },
+          goalsHome: [
+            { name: 'Erling Haaland', assist: 'Corentin Tolisso' },
+            { name: 'Ernest Nuamah', assist: 'Ainsley Maitland-Niles' }
+          ],
+          goalsAway: [
+            { name: 'Hamza Igamane', assist: 'Ayyoub Bouaddi' },
+            { name: 'Osame Sahraoui', assist: 'Romain Perraud' }
+          ]
         }
-        if (l.y <= 0 || l.y + l.size >= sh) {
-          l.vy *= -1;
-          l.y = Math.max(0, Math.min(l.y, sh - l.size));
-        }
-      });
+      ],
+      7: [
+        { home: 'Toulouse FC', away: 'AS Monaco', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'FC Lorient', away: 'Stade Brestois', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'OGC Nice', away: 'AJ Auxerre', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'LOSC Lille', away: 'Olympique de Marseille', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'Paris Saint-Germain', away: 'Olympique Lyonnais', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'Stade Rennais', away: 'Paris FC', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'Le Mans', away: 'RC Lens', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'Angers SCO', away: 'RC Strasbourg', scoreHome: null, scoreAway: null, status: 'À venir' },
+        { home: 'Le Havre AC', away: 'ESTAC Troyes', scoreHome: null, scoreAway: null, status: 'À venir' }
+      ]
+    };
 
-      // 2. Détection de la collision entre Ligue 1 et LFP
-      const l1 = logos[0];
-      const l2 = logos[1];
-
-      const c1x = l1.x + l1.size / 2;
-      const c1y = l1.y + l1.size / 2;
-      const c2x = l2.x + l2.size / 2;
-      const c2y = l2.y + l2.size / 2;
-
-      const dx = c2x - c1x;
-      const dy = c2y - c1y;
-      const dist = Math.hypot(dx, dy);
-      const minDist = l1.size * 0.85; // Rayon de collision effectif
-
-      if (dist < minDist) {
-        // Inversion des trajectoires (Rebond physique réaliste)
-        const tempVx = l1.vx;
-        const tempVy = l1.vy;
-        l1.vx = l2.vx;
-        l1.vy = l2.vy;
-        l2.vx = tempVx;
-        l2.vy = tempVy;
-
-        // Anti-chevauchement (repousse les 2 logos pour qu'ils ne se coincent pas)
-        const overlap = minDist - dist;
-        const nx = dx / (dist || 1);
-        const ny = dy / (dist || 1);
-
-        l1.x -= nx * (overlap / 2);
-        l1.y -= ny * (overlap / 2);
-        l2.x += nx * (overlap / 2);
-        l2.y += ny * (overlap / 2);
-      }
-
-      // 3. Mise à jour des positions HTML
-      logos.forEach(l => {
-        l.el.style.left = l.x + 'px';
-        l.el.style.top = l.y + 'px';
-      });
-
-      requestAnimationFrame(updatePhysics);
-    }
-
-    requestAnimationFrame(updatePhysics);
+    let activeClub = null;
+    let activeContact = "";
 
     /* ---------------------------------------------------------
-       3. FONCTIONS DE RENDU & MODAL
+       4. NAVIGATION ONGLETS
        --------------------------------------------------------- */
-    function renderClubs(filteredList = clubsData) {
+    function switchTab(tabName, evt) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (tabName === 'clubs') {
+        document.getElementById('tab-clubs').classList.add('active');
+        if (evt) evt.target.classList.add('active');
+      } else if (tabName === 'calendar') {
+        document.getElementById('tab-calendar').classList.add('active');
+        if (evt) evt.target.classList.add('active');
+        renderMatches();
+      }
+    }
+
+    /* ---------------------------------------------------------
+       5. RENDU DU CALENDRIER & AFFICHAGE MATCH
+       --------------------------------------------------------- */
+    function renderMatches() {
+      const selectedDay = document.getElementById('daySelect').value;
+      const container = document.getElementById('matchesContainer');
+      container.innerHTML = '';
+
+      const dayMatches = matchesData[selectedDay] || [];
+
+      if (dayMatches.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 40px 0;">Les affiches de cette journée seront bientôt programmées !</div>';
+        return;
+      }
+
+      dayMatches.forEach(match => {
+        const homeClub = clubsData.find(c => c.name === match.home) || { logo: '', name: match.home };
+        const awayClub = clubsData.find(c => c.name === match.away) || { logo: '', name: match.away };
+
+        const scoreText = (match.scoreHome !== null && match.scoreAway !== null)
+          ? `${match.scoreHome} - ${match.scoreAway}`
+          : 'VS';
+
+        const matchCard = document.createElement('div');
+        matchCard.className = 'match-card';
+        matchCard.onclick = () => openMatchModal(match);
+
+        matchCard.innerHTML = `
+          <div class="team-side home">
+            <span>${homeClub.name}</span>
+            <img src="${homeClub.logo}" alt="${homeClub.name}">
+          </div>
+          <div style="text-align: center;">
+            <div class="score-box">${scoreText}</div>
+            <div class="match-status">${match.status}</div>
+          </div>
+          <div class="team-side away">
+            <img src="${awayClub.logo}" alt="${awayClub.name}">
+            <span>${awayClub.name}</span>
+          </div>
+        `;
+        container.appendChild(matchCard);
+      });
+    }
+
+    /* ---------------------------------------------------------
+       6. GESTION DU MODAL STATISTIQUES MATCH
+       --------------------------------------------------------- */
+    function openMatchModal(match) {
+      const homeClub = clubsData.find(c => c.name === match.home) || { logo: '', name: match.home };
+      const awayClub = clubsData.find(c => c.name === match.away) || { logo: '', name: match.away };
+
+      document.getElementById('matchHomeLogo').src = homeClub.logo;
+      document.getElementById('matchHomeName').innerText = homeClub.name;
+      document.getElementById('matchAwayLogo').src = awayClub.logo;
+      document.getElementById('matchAwayName').innerText = awayClub.name;
+
+      const scoreText = (match.scoreHome !== null && match.scoreAway !== null) ? `${match.scoreHome} - ${match.scoreAway}` : 'VS';
+      document.getElementById('matchScoreModal').innerText = scoreText;
+      document.getElementById('matchStatusModal').innerText = match.status;
+
+      // Render Buteurs
+      const goalsHome = document.getElementById('goalsHome');
+      const goalsAway = document.getElementById('goalsAway');
+      goalsHome.innerHTML = '';
+      goalsAway.innerHTML = '';
+
+      if (match.goalsHome && match.goalsHome.length > 0) {
+        match.goalsHome.forEach(g => {
+          goalsHome.innerHTML += `<div class="goal-item">⚽ <b>${g.name}</b>${g.assist ? `<br><span class="assist-item">👟 Passe: ${g.assist}</span>` : ''}</div>`;
+        });
+      }
+
+      if (match.goalsAway && match.goalsAway.length > 0) {
+        match.goalsAway.forEach(g => {
+          goalsAway.innerHTML += `<div class="goal-item">⚽ <b>${g.name}</b>${g.assist ? `<br><span class="assist-item">👟 Passe: ${g.assist}</span>` : ''}</div>`;
+        });
+      }
+
+      // Render Homme du Match
+      const motmBox = document.getElementById('motmBox');
+      if (match.motm) {
+        document.getElementById('motmTitle').innerText = '⭐ Homme du match : ' + match.motm;
+        document.getElementById('motmDesc').innerText = match.motmDesc || '';
+        motmBox.style.display = 'block';
+      } else {
+        motmBox.style.display = 'none';
+      }
+
+      // Render Statistiques
+      const statsList = document.getElementById('statsList');
+      statsList.innerHTML = '';
+
+      if (match.stats) {
+        const labels = {
+          xg: 'Expected Goals (xG)',
+          shots: 'Tirs au but',
+          shotsOnTarget: 'Tirs cadrés',
+          possession: 'Possession (%)',
+          passes: 'Passes réussies',
+          fouls: 'Fautes commises',
+          red: 'Cartons rouges'
+        };
+
+        Object.keys(match.stats).forEach(key => {
+          const valHome = match.stats[key][0];
+          const valAway = match.stats[key][1];
+          const total = (parseFloat(valHome) + parseFloat(valAway)) || 1;
+          const pctHome = Math.round((parseFloat(valHome) / total) * 100);
+          const pctAway = 100 - pctHome;
+
+          statsList.innerHTML += `
+            <div class="stat-row">
+              <div class="stat-row-header">
+                <span>${valHome}</span>
+                <span class="stat-title">${labels[key]}</span>
+                <span>${valAway}</span>
+              </div>
+              <div class="bar-container">
+                <div class="bar-home" style="width: ${pctHome}%;"></div>
+                <div class="bar-away" style="width: ${pctAway}%;"></div>
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        statsList.innerHTML = '<div style="color: #94a3b8; font-size: 13px; margin-top: 15px;">Les statistiques détaillées ne sont pas disponibles pour ce match.</div>';
+      }
+
+      document.getElementById('matchModal').classList.add('active');
+    }
+
+    /* ---------------------------------------------------------
+       7. RENDU DES CLUBS & POP-UP CLUB / EFFECTIF
+       --------------------------------------------------------- */
+    function renderClubs(clubsToRender) {
       const container = document.getElementById('ligue1Container');
       container.innerHTML = '';
 
-      filteredList.forEach((club) => {
-        const clubCard = document.createElement('div');
-        clubCard.className = 'club';
-        clubCard.onclick = () => openModal(club);
+      clubsToRender.forEach(club => {
+        // TOUT l'historique compte pour les points
+        let wins = club.form.filter(r => r === 'V').length;
+        let draws = club.form.filter(r => r === 'N').length;
+        let losses = club.form.filter(r => r === 'D').length;
+        let points = (wins * 3) + draws;
 
-        const lastFiveForm = club.form.slice(-5);
-        const detailsHtml = lastFiveForm.map(r => `<span class="result ${r}">${r}</span>`).join('');
+        const clubDiv = document.createElement('div');
+        clubDiv.className = 'club';
+        clubDiv.onclick = () => openClubModal(club, points, wins, draws, losses);
 
-        clubCard.innerHTML = `
+        // Seuls les 5 DERNIERS résultats sont affichés dans les badges
+        let displayForm = club.form.slice(-5);
+        let formHTML = displayForm.map(r => `<span class="result ${r}">${r}</span>`).join('');
+
+        clubDiv.innerHTML = `
           <img src="${club.logo}" alt="${club.name}">
           <div class="club-name">${club.name}</div>
-          <div class="details">${detailsHtml}</div>
+          <div class="details">${formHTML}</div>
         `;
 
-        container.appendChild(clubCard);
+        container.appendChild(clubDiv);
       });
     }
 
     function filterClubs() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = clubsData.filter(club => club.name.toLowerCase().includes(query));
+      const term = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = clubsData.filter(c => c.name.toLowerCase().includes(term));
       renderClubs(filtered);
     }
 
-    function openModal(club) {
+    function openClubModal(club, points, wins, draws, losses) {
+      activeClub = club;
       document.getElementById('mLogo').src = club.logo;
       document.getElementById('mTitle').innerText = club.name;
-      document.getElementById('mManager').innerText = club.manager || 'Non attribué';
-      document.getElementById('mMonthBadges').innerText = club.monthBadges !== undefined ? club.monthBadges : 0;
-
-      const wins = club.form.filter(r => r === 'V').length;
-      const draws = club.form.filter(r => r === 'N').length;
-      const losses = club.form.filter(r => r === 'D').length;
-      const points = (wins * 3) + (draws * 1);
-
+      document.getElementById('mManager').innerText = club.manager;
+      document.getElementById('mMonthBadges').innerText = club.monthBadges;
+      document.getElementById('mPoints').innerText = points;
       document.getElementById('mWins').innerText = wins;
       document.getElementById('mDraws').innerText = draws;
       document.getElementById('mLosses').innerText = losses;
-      document.getElementById('mPoints').innerText = points;
 
+      activeContact = club.manager;
       document.getElementById('clubModal').classList.add('active');
     }
 
-    function closeModal() {
-      document.getElementById('clubModal').classList.remove('active');
+    function openSquadModal() {
+      if (!activeClub) return;
+
+      document.getElementById('squadLogo').src = activeClub.logo;
+      document.getElementById('squadTitle').innerText = `Effectif - ${activeClub.name}`;
+
+      const squadContainer = document.getElementById('squadContainer');
+      squadContainer.innerHTML = '';
+
+      const roles = [
+        { key: 'gk', label: '🧤 Gardiens' },
+        { key: 'def', label: '🛡️ Défenseurs' },
+        { key: 'mid', label: '⚙️ Milieux' },
+        { key: 'att', label: '⚡ Attaquants' }
+      ];
+
+      roles.forEach(role => {
+        if (activeClub.squad && activeClub.squad[role.key] && activeClub.squad[role.key].length > 0) {
+          const playersHTML = activeClub.squad[role.key]
+            .map(p => `<div class="squad-player">${p}</div>`)
+            .join('');
+
+          squadContainer.innerHTML += `
+            <div class="squad-section">
+              <div class="squad-section-title">${role.label} (${activeClub.squad[role.key].length})</div>
+              <div class="squad-list">${playersHTML}</div>
+            </div>
+          `;
+        }
+      });
+
+      document.getElementById('squadModal').classList.add('active');
     }
 
-    renderClubs();
-  </script>
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
 
+    function copyDiscordContact() {
+      if (!activeContact || activeContact === 'Non attribué') {
+        alert('Aucun contact Discord attribué à ce club pour le moment.');
+        return;
+      }
+      navigator.clipboard.writeText(activeContact).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.innerText = '✅ Copié !';
+        setTimeout(() => { btn.innerText = '📋 Copier contact'; }, 2000);
+      });
+    }
+
+    /* INITIALISATION DE LA PAGE */
+    renderClubs(clubsData);
+  </script>
 </body>
 </html>
