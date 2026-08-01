@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Ma Ligue Discord - Ligue 1</title>
+  <title>Ma Ligue Discord - Ligue 1 & Coupe du Monde</title>
 
   <style>
     /* =========================================================
@@ -256,7 +256,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* LOGOS DE FOND (ANIMATION PHYSIQUE CONTINUED) */
+    /* LOGOS DE FOND */
     .logo-bg {
       position: fixed;
       top: 0;
@@ -535,6 +535,131 @@
 
     .bar-home { background: #38bdf8; height: 100%; }
     .bar-away { background: #ef4444; height: 100%; }
+
+    /* STYLES SPECIFIQUES COUPE DU MONDE */
+    .wc-section-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #38bdf8;
+      border-bottom: 2px solid #334155;
+      padding-bottom: 8px;
+      margin: 35px 0 15px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .rules-card {
+      background: #0f172a;
+      border: 1px solid #38bdf8;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    .rules-card h3 {
+      color: #eab308;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+    .rules-card ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #cbd5e1;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .wc-groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .wc-group-box {
+      background: #1e293b;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      overflow: hidden;
+    }
+    .wc-group-header {
+      background: #38bdf8;
+      color: #020617;
+      font-weight: bold;
+      padding: 10px;
+      text-align: center;
+    }
+    .wc-group-teams {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .wc-team-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f172a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .team-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .flag-img {
+      width: 24px;
+      height: 18px;
+      object-fit: cover;
+      border-radius: 3px;
+      border: 1px solid #334155;
+      background: #1e293b;
+    }
+    .wc-team-status {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .wc-team-status.free {
+      background: #22c55e;
+      color: white;
+    }
+    .wc-team-status.taken {
+      background: #ef4444;
+      color: white;
+    }
+
+    .bracket-container {
+      display: flex;
+      overflow-x: auto;
+      padding: 20px 0;
+      gap: 15px;
+      justify-content: space-between;
+    }
+    .bracket-round {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      min-width: 130px;
+      gap: 10px;
+    }
+    .bracket-match {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .bracket-team {
+      background: #0f172a;
+      padding: 4px;
+      border-radius: 4px;
+      margin: 2px 0;
+      color: #38bdf8;
+    }
   </style>
 </head>
 
@@ -552,6 +677,7 @@
   <div class="nav-tabs">
     <button class="nav-btn active" onclick="switchTab('clubs', event)">🛡️ Équipes</button>
     <button class="nav-btn" onclick="switchTab('calendar', event)">📅 Calendrier & Résultats</button>
+    <button class="nav-btn" onclick="switchTab('worldcup', event)">🏆 Coupe du Monde 2026</button>
   </div>
 
   <!-- LOGOS REBONDISSANTS EN FOND -->
@@ -587,6 +713,125 @@
       <div class="matches-list" id="matchesContainer"></div>
     </div>
 
+    <!-- ONGLET 3: COUPE DU MONDE 2026 -->
+    <div id="tab-worldcup" class="tab-content">
+
+      <!-- 1. RÈGLEMENT OFFICIEL -->
+      <div class="wc-section-title">📜 RÈGLEMENT OFFICIEL : COUPE DU MONDE 2026</div>
+      <div class="rules-card">
+        <h3>1. FORMAT DES MATCHS (RÉALISME TOTAL)</h3>
+        <ul>
+          <li>Tous les matchs durent 40 (2x20min) minutes en temps réel.</li>
+          <li>En phase finale, en cas d'égalité : prolongations (2x15 min) puis séance de tirs au but.</li>
+        </ul>
+
+        <h3>2. GESTION DE L'EFFECTIF ET DES LISTES</h3>
+        <ul>
+          <li>Chaque manager doit soumettre une liste officielle de 26 joueurs maximum.</li>
+          <li>Une fois la compétition lancée, la liste est bloquée.</li>
+          <li>La composition de départ doit être envoyée dans le salon dédié au moins 30 minutes avant le coup d'envoi.</li>
+        </ul>
+
+        <h3>3. CHANGEMENTS EN PLEIN MATCH (VOCAL UNIQUEMENT)</h3>
+        <ul>
+          <li>Les changements de joueurs et modifications tactiques se font obligatoirement en salon vocal.</li>
+        </ul>
+
+        <h3>4. FAIR-PLAY ET COMPORTEMENT</h3>
+        <ul>
+          <li>Le respect total de l'adversaire et du staff est obligatoire.</li>
+          <li><span style="color: #ef4444; font-weight: bold;">Toute toxicité entraînera une disqualification immédiate.</span></li>
+        </ul>
+      </div>
+
+      <!-- 2. TABLEAU DES GROUPES & NATIONS -->
+      <div class="wc-section-title">🌍 GROUPES & SÉLECTIONS LIBRES</div>
+      <div class="wc-groups-grid" id="wcGroupsContainer"></div>
+
+      <!-- 3. CALENDRIER DES MATCHS DE POULES -->
+      <div class="wc-section-title">📅 MATCHS DE LA PHASE DE GROUPES</div>
+      <select id="wcDaySelect" class="select-box" onchange="renderWcMatches()">
+        <option value="1" selected>Journée 1</option>
+        <option value="2">Journée 2</option>
+        <option value="3">Journée 3</option>
+      </select>
+      <div class="matches-list" id="wcMatchesContainer"></div>
+
+      <!-- 4. ARBRE DE PHASE FINALE -->
+      <div class="wc-section-title">🏆 ARBRE DE LA PHASE FINALE</div>
+      <div class="bracket-container">
+        
+        <!-- 16ÈMES DE FINALE (GAUCHE) -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">1E</div><div class="bracket-team">3 ABCDF</div></div>
+          <div class="bracket-match"><div class="bracket-team">1I</div><div class="bracket-team">3 CDFGH</div></div>
+          <div class="bracket-match"><div class="bracket-team">2A</div><div class="bracket-team">2B</div></div>
+          <div class="bracket-match"><div class="bracket-team">1F</div><div class="bracket-team">2C</div></div>
+          <div class="bracket-match"><div class="bracket-team">2K</div><div class="bracket-team">2L</div></div>
+          <div class="bracket-match"><div class="bracket-team">1H</div><div class="bracket-team">2J</div></div>
+          <div class="bracket-match"><div class="bracket-team">1D</div><div class="bracket-team">3 BEFIJ</div></div>
+          <div class="bracket-match"><div class="bracket-team">1G</div><div class="bracket-team">3 AEHIJ</div></div>
+        </div>
+
+        <!-- 8ÈMES DE FINALE -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+        </div>
+
+        <!-- QUARTS DE FINALE -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+        </div>
+
+        <!-- FINALE ET PETITE FINALE (CENTRE) -->
+        <div class="bracket-round" style="gap: 20px;">
+          <div class="bracket-match" style="border-color: #fbbf24;">
+            <span style="color: #fbbf24; font-weight: bold;">🏆 FINALE</span>
+            <div class="bracket-team">---</div>
+            <div class="bracket-team">---</div>
+          </div>
+          
+          <div class="bracket-match" style="border-color: #cd7f32;">
+            <span style="color: #cd7f32; font-weight: bold;">🥉 PETITE FINALE</span>
+            <div class="bracket-team">---</div>
+            <div class="bracket-team">---</div>
+          </div>
+        </div>
+
+        <!-- QUARTS DE FINALE -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+        </div>
+
+        <!-- 8ÈMES DE FINALE -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+          <div class="bracket-match"><div class="bracket-team">---</div><div class="bracket-team">---</div></div>
+        </div>
+
+        <!-- 16ÈMES DE FINALE (DROITE) -->
+        <div class="bracket-round">
+          <div class="bracket-match"><div class="bracket-team">1C</div><div class="bracket-team">2F</div></div>
+          <div class="bracket-match"><div class="bracket-team">2E</div><div class="bracket-team">2I</div></div>
+          <div class="bracket-match"><div class="bracket-team">1A</div><div class="bracket-team">3 CEFHI</div></div>
+          <div class="bracket-match"><div class="bracket-team">1L</div><div class="bracket-team">3 EHIJK</div></div>
+          <div class="bracket-match"><div class="bracket-team">1J</div><div class="bracket-team">2H</div></div>
+          <div class="bracket-match"><div class="bracket-team">2D</div><div class="bracket-team">2G</div></div>
+          <div class="bracket-match"><div class="bracket-team">1B</div><div class="bracket-team">3 EFGIJ</div></div>
+          <div class="bracket-match"><div class="bracket-team">1K</div><div class="bracket-team">3 DEIJL</div></div>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
   <!-- MODAL ÉQUIPE -->
@@ -596,7 +841,6 @@
       <img id="mLogo" class="modal-logo" src="" alt="">
       <div id="mTitle" class="modal-title"></div>
 
-      <!-- BOUTON ACCÈS EFFECTIF -->
       <button class="action-btn" onclick="openSquadModal()">📋 Voir l'effectif complet</button>
       
       <div class="modal-info manager-box">
@@ -663,19 +907,16 @@
         </div>
       </div>
 
-      <!-- SECTION BUTEURS & PASSEURS -->
       <div class="goals-container" id="goalsContainer">
         <div class="goals-home" id="goalsHome"></div>
         <div class="goals-away" id="goalsAway"></div>
       </div>
 
-      <!-- HOMME DU MATCH -->
       <div class="motm-box" id="motmBox" style="display: none;">
         <div class="motm-title" id="motmTitle">⭐ Homme du match : </div>
         <div class="motm-desc" id="motmDesc"></div>
       </div>
 
-      <!-- STATISTIQUES DU MATCH -->
       <div id="statsList"></div>
     </div>
   </div>
@@ -709,10 +950,6 @@
 
       requestAnimationFrame(animateLogos);
     }
-
-    window.onload = () => {
-      animateLogos();
-    };
 
     /* ---------------------------------------------------------
        2. DONNÉES DES CLUBS ET EFFECTIFS
@@ -1090,7 +1327,7 @@
     let activeContact = "";
 
     /* ---------------------------------------------------------
-       4. NAVIGATION ONGLETS
+       4. NAVIGATION ONGLETS (GESTION UNIFIÉE)
        --------------------------------------------------------- */
     function switchTab(tabName, evt) {
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -1098,11 +1335,17 @@
 
       if (tabName === 'clubs') {
         document.getElementById('tab-clubs').classList.add('active');
-        if (evt) evt.target.classList.add('active');
       } else if (tabName === 'calendar') {
         document.getElementById('tab-calendar').classList.add('active');
-        if (evt) evt.target.classList.add('active');
         renderMatches();
+      } else if (tabName === 'worldcup') {
+        document.getElementById('tab-worldcup').classList.add('active');
+        renderWcGroups();
+        renderWcMatches();
+      }
+
+      if (evt && evt.target) {
+        evt.target.classList.add('active');
       }
     }
 
@@ -1155,8 +1398,8 @@
        6. GESTION DU MODAL STATISTIQUES MATCH
        --------------------------------------------------------- */
     function openMatchModal(match) {
-      const homeClub = clubsData.find(c => c.name === match.home) || { logo: '', name: match.home };
-      const awayClub = clubsData.find(c => c.name === match.away) || { logo: '', name: match.away };
+      const homeClub = clubsData.find(c => c.name === match.home) || { logo: getFlag(match.home), name: match.home };
+      const awayClub = clubsData.find(c => c.name === match.away) || { logo: getFlag(match.away), name: match.away };
 
       document.getElementById('matchHomeLogo').src = homeClub.logo;
       document.getElementById('matchHomeName').innerText = homeClub.name;
@@ -1165,9 +1408,8 @@
 
       const scoreText = (match.scoreHome !== null && match.scoreAway !== null) ? `${match.scoreHome} - ${match.scoreAway}` : 'VS';
       document.getElementById('matchScoreModal').innerText = scoreText;
-      document.getElementById('matchStatusModal').innerText = match.status;
+      document.getElementById('matchStatusModal').innerText = match.status || 'À jouer';
 
-      // Render Buteurs
       const goalsHome = document.getElementById('goalsHome');
       const goalsAway = document.getElementById('goalsAway');
       goalsHome.innerHTML = '';
@@ -1185,7 +1427,6 @@
         });
       }
 
-      // Render Homme du Match
       const motmBox = document.getElementById('motmBox');
       if (match.motm) {
         document.getElementById('motmTitle').innerText = '⭐ Homme du match : ' + match.motm;
@@ -1195,7 +1436,6 @@
         motmBox.style.display = 'none';
       }
 
-      // Render Statistiques
       const statsList = document.getElementById('statsList');
       statsList.innerHTML = '';
 
@@ -1246,7 +1486,6 @@
       container.innerHTML = '';
 
       clubsToRender.forEach(club => {
-        // TOUT l'historique compte pour les points
         let wins = club.form.filter(r => r === 'V').length;
         let draws = club.form.filter(r => r === 'N').length;
         let losses = club.form.filter(r => r === 'D').length;
@@ -1256,7 +1495,6 @@
         clubDiv.className = 'club';
         clubDiv.onclick = () => openClubModal(club, points, wins, draws, losses);
 
-        // Seuls les 5 DERNIERS résultats sont affichés dans les badges
         let displayForm = club.form.slice(-5);
         let formHTML = displayForm.map(r => `<span class="result ${r}">${r}</span>`).join('');
 
@@ -1341,8 +1579,296 @@
       });
     }
 
-    /* INITIALISATION DE LA PAGE */
-    renderClubs(clubsData);
+    /* ---------------------------------------------------------
+       8. DONNÉES ET RENDU DE LA COUPE DU MONDE 2026
+       --------------------------------------------------------- */
+    const flagUrls = {
+      "Canada": "https://flagcdn.com/w40/ca.png",
+      "États-Unis": "https://flagcdn.com/w40/us.png",
+      "Mexique": "https://flagcdn.com/w40/mx.png",
+      "Arabie saoudite": "https://flagcdn.com/w40/sa.png",
+      "Australie": "https://flagcdn.com/w40/au.png",
+      "Irak": "https://flagcdn.com/w40/iq.png",
+      "Japon": "https://flagcdn.com/w40/jp.png",
+      "Jordanie": "https://flagcdn.com/w40/jo.png",
+      "Ouzbékistan": "https://flagcdn.com/w40/uz.png",
+      "Qatar": "https://flagcdn.com/w40/qa.png",
+      "République de Corée": "https://flagcdn.com/w40/kr.png",
+      "Corée du Sud": "https://flagcdn.com/w40/kr.png",
+      "RI Iran": "https://flagcdn.com/w40/ir.png",
+      "Iran": "https://flagcdn.com/w40/ir.png",
+      "Afrique du Sud": "https://flagcdn.com/w40/za.png",
+      "Algérie": "https://flagcdn.com/w40/dz.png",
+      "Cap-Vert": "https://flagcdn.com/w40/cv.png",
+      "Côte d'Ivoire": "https://flagcdn.com/w40/ci.png",
+      "Côte d’Ivoire": "https://flagcdn.com/w40/ci.png",
+      "Égypte": "https://flagcdn.com/w40/eg.png",
+      "Ghana": "https://flagcdn.com/w40/gh.png",
+      "Maroc": "https://flagcdn.com/w40/ma.png",
+      "RD Congo": "https://flagcdn.com/w40/cd.png",
+      "RDC": "https://flagcdn.com/w40/cd.png",
+      "Sénégal": "https://flagcdn.com/w40/sn.png",
+      "Tunisie": "https://flagcdn.com/w40/tn.png",
+      "Curaçao": "https://flagcdn.com/w40/cw.png",
+      "Haïti": "https://flagcdn.com/w40/ht.png",
+      "Panamá": "https://flagcdn.com/w40/pa.png",
+      "Panama": "https://flagcdn.com/w40/pa.png",
+      "Argentine": "https://flagcdn.com/w40/ar.png",
+      "Brésil": "https://flagcdn.com/w40/br.png",
+      "Colombie": "https://flagcdn.com/w40/co.png",
+      "Équateur": "https://flagcdn.com/w40/ec.png",
+      "Paraguay": "https://flagcdn.com/w40/py.png",
+      "Uruguay": "https://flagcdn.com/w40/uy.png",
+      "Nouvelle-Zélande": "https://flagcdn.com/w40/nz.png",
+      "Allemagne": "https://flagcdn.com/w40/de.png",
+      "Angleterre": "https://flagcdn.com/w40/gb-eng.png",
+      "Autriche": "https://flagcdn.com/w40/at.png",
+      "Belgique": "https://flagcdn.com/w40/be.png",
+      "Bosnie-Herzégovine": "https://flagcdn.com/w40/ba.png",
+      "Bosnie-et-Herzégovine": "https://flagcdn.com/w40/ba.png",
+      "Croatie": "https://flagcdn.com/w40/hr.png",
+      "Écosse": "https://flagcdn.com/w40/gb-sct.png",
+      "France": "https://flagcdn.com/w40/fr.png",
+      "Espagne": "https://flagcdn.com/w40/es.png",
+      "Norvège": "https://flagcdn.com/w40/no.png",
+      "Pays-Bas": "https://flagcdn.com/w40/nl.png",
+      "Portugal": "https://flagcdn.com/w40/pt.png",
+      "Suède": "https://flagcdn.com/w40/se.png",
+      "Suisse": "https://flagcdn.com/w40/ch.png",
+      "Tchéquie": "https://flagcdn.com/w40/cz.png",
+      "République tchèque": "https://flagcdn.com/w40/cz.png",
+      "Rép. tchèque": "https://flagcdn.com/w40/cz.png",
+      "Turquie": "https://flagcdn.com/w40/tr.png"
+    };
+
+    const defaultFlag = "https://via.placeholder.com/24x18/1e293b/38bdf8?text=🏳️";
+
+    function getFlag(teamName) {
+      return flagUrls[teamName] || defaultFlag;
+    }
+
+    const wcGroups = {
+      'GROUPE A': [
+        { name: 'Mexique', status: 'free' },
+        { name: 'Afrique du Sud', status: 'free' },
+        { name: 'Corée du Sud', status: 'free' },
+        { name: 'Rép. tchèque', status: 'free' }
+      ],
+      'GROUPE B': [
+        { name: 'Canada', status: 'free' },
+        { name: 'Bosnie-Herzégovine', status: 'free' },
+        { name: 'Qatar', status: 'free' },
+        { name: 'Suisse', status: 'free' }
+      ],
+      'GROUPE C': [
+        { name: 'Brésil', status: 'free' },
+        { name: 'Maroc', status: 'free' },
+        { name: 'Haïti', status: 'free' },
+        { name: 'Écosse', status: 'free' }
+      ],
+      'GROUPE D': [
+        { name: 'États-Unis', status: 'free' },
+        { name: 'Paraguay', status: 'free' },
+        { name: 'Australie', status: 'free' },
+        { name: 'Turquie', status: 'free' }
+      ],
+      'GROUPE E': [
+        { name: 'Allemagne', status: 'free' },
+        { name: 'Curaçao', status: 'free' },
+        { name: 'Côte d’Ivoire', status: 'free' },
+        { name: 'Équateur', status: 'free' }
+      ],
+      'GROUPE F': [
+        { name: 'Pays-Bas', status: 'free' },
+        { name: 'Japon', status: 'free' },
+        { name: 'Suède', status: 'free' },
+        { name: 'Tunisie', status: 'free' }
+      ],
+      'GROUPE G': [
+        { name: 'Belgique', status: 'free' },
+        { name: 'Égypte', status: 'free' },
+        { name: 'Iran', status: 'free' },
+        { name: 'Nouvelle-Zélande', status: 'free' }
+      ],
+      'GROUPE H': [
+        { name: 'Espagne', status: 'free' },
+        { name: 'Cap-Vert', status: 'free' },
+        { name: 'Arabie saoudite', status: 'free' },
+        { name: 'Uruguay', status: 'free' }
+      ],
+      'GROUPE I': [
+        { name: 'France', status: 'free' },
+        { name: 'Sénégal', status: 'free' },
+        { name: 'Irak', status: 'free' },
+        { name: 'Norvège', status: 'free' }
+      ],
+      'GROUPE J': [
+        { name: 'Argentine', status: 'free' },
+        { name: 'Algérie', status: 'free' },
+        { name: 'Autriche', status: 'free' },
+        { name: 'Jordanie', status: 'free' }
+      ],
+      'GROUPE K': [
+        { name: 'Portugal', status: 'free' },
+        { name: 'RD Congo', status: 'free' },
+        { name: 'Ouzbékistan', status: 'free' },
+        { name: 'Colombie', status: 'free' }
+      ],
+      'GROUPE L': [
+        { name: 'Angleterre', status: 'free' },
+        { name: 'Croatie', status: 'free' },
+        { name: 'Ghana', status: 'free' },
+        { name: 'Panama', status: 'free' }
+      ]
+    };
+
+    const wcMatchesData = {
+      1: [
+        { home: "Mexique", away: "Afrique du Sud", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Corée du Sud", away: "Rép. tchèque", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Canada", away: "Bosnie-Herzégovine", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "États-Unis", away: "Paraguay", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Qatar", away: "Suisse", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Brésil", away: "Maroc", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Haïti", away: "Écosse", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Australie", away: "Turquie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Allemagne", away: "Curaçao", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Pays-Bas", away: "Japon", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Côte d’Ivoire", away: "Équateur", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Suède", away: "Tunisie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Espagne", away: "Cap-Vert", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Belgique", away: "Égypte", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Arabie saoudite", away: "Uruguay", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Iran", away: "Nouvelle-Zélande", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "France", away: "Sénégal", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Irak", away: "Norvège", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Argentine", away: "Algérie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Autriche", away: "Jordanie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Portugal", away: "RD Congo", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Angleterre", away: "Croatie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Ghana", away: "Panama", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Ouzbékistan", away: "Colombie", scoreHome: null, scoreAway: null, status: "À jouer" }
+      ],
+      2: [
+        { home: "Rép. tchèque", away: "Afrique du Sud", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Suisse", away: "Bosnie-Herzégovine", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Canada", away: "Qatar", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Mexique", away: "Corée du Sud", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "États-Unis", away: "Australie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Écosse", away: "Maroc", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Brésil", away: "Haïti", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Turquie", away: "Paraguay", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Pays-Bas", away: "Suède", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Allemagne", away: "Côte d’Ivoire", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Équateur", away: "Curaçao", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Tunisie", away: "Japon", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Espagne", away: "Arabie saoudite", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Belgique", away: "Iran", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Uruguay", away: "Cap-Vert", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Nouvelle-Zélande", away: "Égypte", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Argentine", away: "Autriche", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "France", away: "Irak", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Norvège", away: "Sénégal", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Jordanie", away: "Algérie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Portugal", away: "Ouzbékistan", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Angleterre", away: "Ghana", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Panama", away: "Croatie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Colombie", away: "RD Congo", scoreHome: null, scoreAway: null, status: "À jouer" }
+      ],
+      3: [
+        { home: "Suisse", away: "Canada", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Bosnie-Herzégovine", away: "Qatar", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Écosse", away: "Brésil", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Maroc", away: "Haïti", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Rép. tchèque", away: "Mexique", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Afrique du Sud", away: "Corée du Sud", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Équateur", away: "Allemagne", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Curaçao", away: "Côte d’Ivoire", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Japon", away: "Suède", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Tunisie", away: "Pays-Bas", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Turquie", away: "États-Unis", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Paraguay", away: "Australie", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Norvège", away: "France", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Sénégal", away: "Irak", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Cap-Vert", away: "Arabie saoudite", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Uruguay", away: "Espagne", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Égypte", away: "Iran", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Nouvelle-Zélande", away: "Belgique", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Panama", away: "Angleterre", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Croatie", away: "Ghana", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Colombie", away: "Portugal", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "RD Congo", away: "Ouzbékistan", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Algérie", away: "Autriche", scoreHome: null, scoreAway: null, status: "À jouer" },
+        { home: "Jordanie", away: "Argentine", scoreHome: null, scoreAway: null, status: "À jouer" }
+      ]
+    };
+
+    function renderWcGroups() {
+      const container = document.getElementById('wcGroupsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      for (let group in wcGroups) {
+        let groupHTML = `<div class="wc-group-box">
+          <div class="wc-group-header">${group}</div>
+          <div class="wc-group-teams">`;
+        wcGroups[group].forEach(team => {
+          const isTaken = team.status === 'taken';
+          const badgeClass = isTaken ? 'taken' : 'free';
+          const badgeText = isTaken ? 'Complet' : 'Libre';
+
+          groupHTML += `<div class="wc-team-item">
+            <div class="team-info">
+              <img src="${getFlag(team.name)}" alt="${team.name}" class="flag-img">
+              <span>${team.name}</span>
+            </div>
+            <span class="wc-team-status ${badgeClass}">${badgeText}</span>
+          </div>`;
+        });
+        groupHTML += `</div></div>`;
+        container.innerHTML += groupHTML;
+      }
+    }
+
+    function renderWcMatches() {
+      const daySelect = document.getElementById('wcDaySelect');
+      const container = document.getElementById('wcMatchesContainer');
+      if (!daySelect || !container) return;
+      const day = daySelect.value;
+      container.innerHTML = '';
+      
+      wcMatchesData[day].forEach(match => {
+        const homeTeam = match.home;
+        const awayTeam = match.away;
+        const scoreText = (match.scoreHome !== null && match.scoreAway !== null) ? `${match.scoreHome} - ${match.scoreAway}` : 'VS';
+        const matchStatus = match.status || 'À jouer';
+        
+        const card = document.createElement('div');
+        card.className = 'match-card';
+        card.onclick = () => openMatchModal(match);
+        card.innerHTML = `
+          <div class="team-side home">
+            <span>${homeTeam}</span>
+            <img src="${getFlag(homeTeam)}" alt="${homeTeam}" class="flag-img">
+          </div>
+          <div style="text-align: center;">
+            <div class="score-box">${scoreText}</div>
+            <div class="match-status">${matchStatus}</div>
+          </div>
+          <div class="team-side away">
+            <img src="${getFlag(awayTeam)}" alt="${awayTeam}" class="flag-img">
+            <span>${awayTeam}</span>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    /* INITIALISATION GLOBALE AU CHARGEMENT DE LA PAGE */
+    window.onload = () => {
+      animateLogos();
+      renderClubs(clubsData);
+      renderWcGroups();
+      renderWcMatches();
+    };
   </script>
 </body>
 </html>
