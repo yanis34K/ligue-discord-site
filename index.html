@@ -608,14 +608,18 @@
       align-items: center;
       gap: 10px;
     }
-    .flag-img {
-      width: 24px;
-      height: 18px;
+
+    /* Unifie le style des drapeaux entre les groupes et le calendrier Coupe du Monde */
+    .wc-group-teams .flag-img,
+    .matches-list .flag-img {
+      width: 30px;
+      height: 20px;
       object-fit: cover;
-      border-radius: 3px;
+      border-radius: 8px 0px 8px 0px;
       border: 1px solid #334155;
       background: #1e293b;
     }
+
     .wc-team-status {
       font-size: 11px;
       padding: 2px 6px;
