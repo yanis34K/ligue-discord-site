@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <title>Ma Ligue Discord - Ligue 1 & Coupe du Monde</title>
 
+  <!-- Google Fonts: Orbitron & Antonio -->
+  <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
   <style>
     /* =========================================================
        1. STYLES GÉNÉRAUX & PAGE
@@ -240,12 +243,16 @@
       background: #0f172a;
       padding: 8px 16px;
       border-radius: 10px;
-      font-weight: bold;
-      font-size: 18px;
+      font-size: 24px;
       color: #38bdf8;
       border: 1px solid #334155;
       min-width: 60px;
       text-align: center;
+
+      /* --- POLICE SPORTIVE / ANTONIO --- */
+      font-family: 'Antonio', sans-serif;
+      font-weight: 700;
+      letter-spacing: 2px;
     }
 
     .match-status {
@@ -459,13 +466,17 @@
     }
 
     .score-modal-box {
-      font-size: 26px;
+      font-size: 32px;
       font-weight: bold;
       color: #38bdf8;
       background: #1e293b;
       padding: 8px 18px;
       border-radius: 12px;
       border: 1px solid #334155;
+
+      /* Style d'écriture Antonio */
+      font-family: 'Antonio', sans-serif;
+      letter-spacing: 2px;
     }
 
     /* BUTS & PASSEURS */
@@ -2076,27 +2087,7 @@
         { home: "Suisse", away: "Canada", scoreHome: null, scoreAway: null, status: "À jouer" },
         { home: "Bosnie-Herzégovine", away: "Qatar", scoreHome: null, scoreAway: null, status: "À jouer" },
         { home: "Écosse", away: "Brésil", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Maroc", away: "Haïti", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Rép. tchèque", away: "Mexique", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Afrique du Sud", away: "Corée du Sud", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Équateur", away: "Allemagne", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Curaçao", away: "Côte d’Ivoire", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Japon", away: "Suède", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Tunisie", away: "Pays-Bas", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Turquie", away: "États-Unis", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Paraguay", away: "Australie", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Norvège", away: "France", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Sénégal", away: "Irak", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Cap-Vert", away: "Arabie saoudite", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Uruguay", away: "Espagne", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Égypte", away: "Iran", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Nouvelle-Zélande", away: "Belgique", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Panama", away: "Angleterre", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Croatie", away: "Ghana", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Colombie", away: "Portugal", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "RD Congo", away: "Ouzbékistan", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Algérie", away: "Autriche", scoreHome: null, scoreAway: null, status: "À jouer" },
-        { home: "Jordanie", away: "Argentine", scoreHome: null, scoreAway: null, status: "À jouer" }
+        { home: "Maroc", away: "Haïti", scoreHome: null, scoreAway: null, status: "À jouer" }
       ]
     };
 
@@ -2104,64 +2095,71 @@
       const container = document.getElementById('wcGroupsContainer');
       if (!container) return;
       container.innerHTML = '';
-      for (let group in wcGroups) {
-        let groupHTML = `<div class="wc-group-box">
-          <div class="wc-group-header">${group}</div>
-          <div class="wc-group-teams">`;
-        wcGroups[group].forEach(team => {
-          const isTaken = team.status === 'taken';
-          const badgeClass = isTaken ? 'taken' : 'free';
-          const badgeText = isTaken ? 'Complet' : 'Libre';
 
-          groupHTML += `<div class="wc-team-item">
+      Object.keys(wcGroups).forEach(groupName => {
+        const teams = wcGroups[groupName];
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'wc-group-box';
+
+        let teamsHTML = teams.map(t => `
+          <div class="wc-team-item">
             <div class="team-info">
-              <img src="${getFlag(team.name)}" alt="${team.name}" class="flag-img">
-              <span>${team.name}</span>
+              <img src="${getFlag(t.name)}" alt="${t.name}" class="flag-img">
+              <span>${t.name}</span>
             </div>
-            <span class="wc-team-status ${badgeClass}">${badgeText}</span>
-          </div>`;
-        });
-        groupHTML += `</div></div>`;
-        container.innerHTML += groupHTML;
-      }
+            <span class="wc-team-status ${t.status}">${t.status === 'taken' ? 'Pris' : 'Libre'}</span>
+          </div>
+        `).join('');
+
+        groupDiv.innerHTML = `
+          <div class="wc-group-header">${groupName}</div>
+          <div class="wc-group-teams">${teamsHTML}</div>
+        `;
+
+        container.appendChild(groupDiv);
+      });
     }
 
     function renderWcMatches() {
-      const daySelect = document.getElementById('wcDaySelect');
+      const selectedDay = document.getElementById('wcDaySelect').value;
       const container = document.getElementById('wcMatchesContainer');
-      if (!daySelect || !container) return;
-      const day = daySelect.value;
+      if (!container) return;
       container.innerHTML = '';
-      
-      wcMatchesData[day].forEach(match => {
-        const homeTeam = match.home;
-        const awayTeam = match.away;
+
+      const dayMatches = wcMatchesData[selectedDay] || [];
+
+      if (dayMatches.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 40px 0;">Aucun match au programme.</div>';
+        return;
+      }
+
+      dayMatches.forEach(match => {
         const scoreText = (match.scoreHome !== null && match.scoreAway !== null) ? `${match.scoreHome} - ${match.scoreAway}` : 'VS';
-        const matchStatus = match.status || 'À jouer';
-        
-        const card = document.createElement('div');
-        card.className = 'match-card';
-        card.onclick = () => openMatchModal(match);
-        card.innerHTML = `
+
+        const matchCard = document.createElement('div');
+        matchCard.className = 'match-card';
+        matchCard.onclick = () => openMatchModal(match);
+
+        matchCard.innerHTML = `
           <div class="team-side home">
-            <span>${homeTeam}</span>
-            <img src="${getFlag(homeTeam)}" alt="${homeTeam}" class="flag-img">
+            <span>${match.home}</span>
+            <img src="${getFlag(match.home)}" alt="${match.home}" class="flag-img">
           </div>
           <div style="text-align: center;">
             <div class="score-box">${scoreText}</div>
-            <div class="match-status">${matchStatus}</div>
+            <div class="match-status">${match.status}</div>
           </div>
           <div class="team-side away">
-            <img src="${getFlag(awayTeam)}" alt="${awayTeam}" class="flag-img">
-            <span>${awayTeam}</span>
+            <img src="${getFlag(match.away)}" alt="${match.away}" class="flag-img">
+            <span>${match.away}</span>
           </div>
         `;
-        container.appendChild(card);
+        container.appendChild(matchCard);
       });
     }
 
     /* ---------------------------------------------------------
-       9. INITIALISATION
+       9. INITIALISATION AU CHARGEMENT
        --------------------------------------------------------- */
     window.onload = () => {
       renderClubs(clubsData);
